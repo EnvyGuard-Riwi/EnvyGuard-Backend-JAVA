@@ -1,0 +1,5 @@
+com/envyguard/envyguard_backend/security/JwtService.class
+com/envyguard/envyguard_backend/security/UserDetailsServiceImpl.class
+com/envyguard/envyguard_backend/security/JwtAuthenticationFilter.class
+com/envyguard/envyguard_backend/EnvyGuardApplication.class
+com/envyguard/envyguard_backend/security/SecurityConfig.class

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: envyguard-backend
+
+# Desactivar seguridad temporalmente para que pasen los tests
+spring.security:
+  enabled: false

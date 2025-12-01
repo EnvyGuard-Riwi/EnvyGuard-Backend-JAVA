@@ -1,0 +1,5 @@
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/EnvyGuardApplication.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/JwtAuthenticationFilter.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/SecurityConfig.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/UserDetailsServiceImpl.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/JwtService.java
