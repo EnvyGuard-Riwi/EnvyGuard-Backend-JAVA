@@ -4,6 +4,7 @@
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/config/SecurityConfig.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/controller/AuthController.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/controller/CommandController.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/controller/ComputerController.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/CommandRequest.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/LoginRequest.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/LoginResponse.java
@@ -16,4 +17,5 @@
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/security/JwtAuthenticationFilter.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/service/AuthService.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/service/CommandService.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/service/ComputerService.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/service/JwtService.java

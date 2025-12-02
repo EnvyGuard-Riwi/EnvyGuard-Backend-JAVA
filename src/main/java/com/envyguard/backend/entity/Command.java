@@ -30,6 +30,7 @@ public class Command {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private CommandStatus status = CommandStatus.PENDING;
 
     @Column(name = "sent_at")
