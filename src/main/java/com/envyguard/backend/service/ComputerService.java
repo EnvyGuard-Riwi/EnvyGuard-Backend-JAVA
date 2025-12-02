@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Servicio para gestionar computadores en el sistema.
+ * Service for managing computers in the system.
  */
 @Service
 @RequiredArgsConstructor
@@ -19,14 +19,14 @@ public class ComputerService {
     private final ComputerRepository computerRepository;
 
     /**
-     * Crea un nuevo computador en el sistema.
+     * Creates a new computer in the system.
      *
-     * @param name Nombre único del computador
-     * @param ipAddress Dirección IP (opcional)
-     * @param macAddress Dirección MAC (opcional)
-     * @param labName Nombre del laboratorio (opcional)
-     * @return Computer creado
-     * @throws IllegalArgumentException Si el nombre ya existe
+     * @param name Unique computer name
+     * @param ipAddress IP address (optional)
+     * @param macAddress MAC address (optional)
+     * @param labName Laboratory name (optional)
+     * @return Created computer
+     * @throws IllegalArgumentException If name already exists
      */
     @Transactional
     public Computer createComputer(String name, String ipAddress, String macAddress, String labName) {
@@ -46,20 +46,20 @@ public class ComputerService {
     }
 
     /**
-     * Obtiene todos los computadores.
+     * Gets all computers.
      *
-     * @return Lista de todos los computadores
+     * @return List of all computers
      */
     public List<Computer> getAllComputers() {
         return computerRepository.findAll();
     }
 
     /**
-     * Obtiene un computador por su nombre.
+     * Gets a computer by its name.
      *
-     * @param name Nombre del computador
-     * @return Computer encontrado
-     * @throws IllegalArgumentException Si el computador no existe
+     * @param name Computer name
+     * @return Found computer
+     * @throws IllegalArgumentException If computer does not exist
      */
     public Computer getComputerByName(String name) {
         return computerRepository.findByName(name)
@@ -67,11 +67,11 @@ public class ComputerService {
     }
 
     /**
-     * Obtiene un computador por su ID.
+     * Gets a computer by its ID.
      *
-     * @param id ID del computador
-     * @return Computer encontrado
-     * @throws IllegalArgumentException Si el computador no existe
+     * @param id Computer ID
+     * @return Found computer
+     * @throws IllegalArgumentException If computer does not exist
      */
     public Computer getComputerById(Long id) {
         return computerRepository.findById(id)
@@ -79,12 +79,12 @@ public class ComputerService {
     }
 
     /**
-     * Actualiza el estado de un computador.
-     * Usado cuando el agente C# reporta su estado.
+     * Updates a computer's status.
+     * Used when the C# agent reports its status.
      *
-     * @param name Nombre del computador
-     * @param status Nuevo estado
-     * @return Computer actualizado
+     * @param name Computer name
+     * @param status New status
+     * @return Updated computer
      */
     @Transactional
     public Computer updateComputerStatus(String name, Computer.ComputerStatus status) {
@@ -95,13 +95,13 @@ public class ComputerService {
     }
 
     /**
-     * Actualiza la información de un computador.
+     * Updates computer information.
      *
-     * @param id ID del computador
-     * @param ipAddress Nueva IP (opcional)
-     * @param macAddress Nueva MAC (opcional)
-     * @param labName Nuevo nombre de laboratorio (opcional)
-     * @return Computer actualizado
+     * @param id Computer ID
+     * @param ipAddress New IP (optional)
+     * @param macAddress New MAC (optional)
+     * @param labName New laboratory name (optional)
+     * @return Updated computer
      */
     @Transactional
     public Computer updateComputer(Long id, String ipAddress, String macAddress, String labName) {
@@ -121,9 +121,9 @@ public class ComputerService {
     }
 
     /**
-     * Elimina un computador del sistema.
+     * Deletes a computer from the system.
      *
-     * @param id ID del computador
+     * @param id Computer ID
      */
     @Transactional
     public void deleteComputer(Long id) {

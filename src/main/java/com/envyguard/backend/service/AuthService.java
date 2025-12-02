@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Servicio para manejar autenticación y registro de usuarios.
+ * Service for handling user authentication and registration.
  */
 @Service
 @RequiredArgsConstructor
@@ -24,14 +24,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     /**
-     * Registra un nuevo usuario en el sistema.
+     * Registers a new user in the system.
      *
-     * @param email Email del usuario
-     * @param password Contraseña sin encriptar
-     * @param firstName Nombre del usuario
-     * @param lastName Apellido del usuario
-     * @return Usuario creado
-     * @throws IllegalArgumentException Si el email ya existe
+     * @param email User email
+     * @param password Unencrypted password
+     * @param firstName User first name
+     * @param lastName User last name
+     * @return Created user
+     * @throws IllegalArgumentException If email already exists
      */
     @Transactional
     public User register(String email, String password, String firstName, String lastName) {
@@ -51,11 +51,11 @@ public class AuthService {
     }
 
     /**
-     * Autentica un usuario y genera un token JWT.
+     * Authenticates a user and generates a JWT token.
      *
-     * @param request Solicitud de login con email y password
-     * @return LoginResponse con token JWT y datos del usuario
-     * @throws org.springframework.security.core.AuthenticationException Si las credenciales son inválidas
+     * @param request Login request with email and password
+     * @return LoginResponse with JWT token and user data
+     * @throws org.springframework.security.core.AuthenticationException If credentials are invalid
      */
     public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(

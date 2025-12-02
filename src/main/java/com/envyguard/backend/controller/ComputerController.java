@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controlador REST para gestión de computadores.
+ * REST controller for computer management.
  */
 @RestController
 @RequestMapping("/computers")
@@ -22,11 +22,11 @@ public class ComputerController {
     private final ComputerService computerService;
 
     /**
-     * Crea un nuevo computador.
+     * Creates a new computer.
      * Endpoint: POST /api/computers
      *
-     * @param request Mapa con name, ipAddress, macAddress, labName
-     * @return Computer creado
+     * @param request Map with name, ipAddress, macAddress, labName
+     * @return Created computer
      */
     @PostMapping
     public ResponseEntity<Computer> createComputer(@RequestBody Map<String, String> request) {
@@ -40,10 +40,10 @@ public class ComputerController {
     }
 
     /**
-     * Obtiene todos los computadores.
+     * Gets all computers.
      * Endpoint: GET /api/computers
      *
-     * @return Lista de todos los computadores
+     * @return List of all computers
      */
     @GetMapping
     public ResponseEntity<List<Computer>> getAllComputers() {
@@ -52,11 +52,11 @@ public class ComputerController {
     }
 
     /**
-     * Obtiene un computador por su nombre.
+     * Gets a computer by its name.
      * Endpoint: GET /api/computers/name/{name}
      *
-     * @param name Nombre del computador
-     * @return Computer encontrado
+     * @param name Computer name
+     * @return Found computer
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<Computer> getComputerByName(@PathVariable String name) {
@@ -65,11 +65,11 @@ public class ComputerController {
     }
 
     /**
-     * Obtiene un computador por su ID.
+     * Gets a computer by its ID.
      * Endpoint: GET /api/computers/{id}
      *
-     * @param id ID del computador
-     * @return Computer encontrado
+     * @param id Computer ID
+     * @return Found computer
      */
     @GetMapping("/{id}")
     public ResponseEntity<Computer> getComputerById(@PathVariable Long id) {
@@ -78,12 +78,12 @@ public class ComputerController {
     }
 
     /**
-     * Actualiza el estado de un computador.
+     * Updates a computer's status.
      * Endpoint: PUT /api/computers/{name}/status
      *
-     * @param name Nombre del computador
-     * @param request Mapa con status
-     * @return Computer actualizado
+     * @param name Computer name
+     * @param request Map with status
+     * @return Updated computer
      */
     @PutMapping("/{name}/status")
     public ResponseEntity<Computer> updateComputerStatus(
@@ -95,12 +95,12 @@ public class ComputerController {
     }
 
     /**
-     * Actualiza la información de un computador.
+     * Updates computer information.
      * Endpoint: PUT /api/computers/{id}
      *
-     * @param id ID del computador
-     * @param request Mapa con ipAddress, macAddress, labName
-     * @return Computer actualizado
+     * @param id Computer ID
+     * @param request Map with ipAddress, macAddress, labName
+     * @return Updated computer
      */
     @PutMapping("/{id}")
     public ResponseEntity<Computer> updateComputer(
@@ -115,11 +115,11 @@ public class ComputerController {
     }
 
     /**
-     * Elimina un computador.
+     * Deletes a computer.
      * Endpoint: DELETE /api/computers/{id}
      *
-     * @param id ID del computador
-     * @return Mensaje de confirmación
+     * @param id Computer ID
+     * @return Confirmation message
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteComputer(@PathVariable Long id) {

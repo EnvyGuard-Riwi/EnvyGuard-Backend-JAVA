@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Configuración de seguridad de Spring Security.
- * Define políticas de autenticación, autorización y CORS.
+ * Spring Security configuration.
+ * Defines authentication, authorization, and CORS policies.
  */
 @Configuration
 @EnableWebSecurity
@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -6,8 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * Representa un computador en el sistema EnvyGuard.
- * Almacena información sobre el estado, identificación y configuración de cada equipo.
+ * Represents a computer in the EnvyGuard system.
+ * Stores information about status, identification, and configuration of each computer.
  */
 @Entity
 @Table(name = "computers")

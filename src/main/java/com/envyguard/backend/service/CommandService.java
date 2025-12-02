@@ -1,11 +1,12 @@
 package com.envyguard.backend.service;
 
+import com.envyguard.backend.dto.CommandMessage;
 import com.envyguard.backend.dto.CommandRequest;
 import com.envyguard.backend.entity.Command;
-import com.envyguard.backend.entity.Computer;
 import com.envyguard.backend.repository.CommandRepository;
 import com.envyguard.backend.repository.ComputerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,29 +14,31 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Servicio para gestionar comandos remotos.
- * Por ahora solo guarda comandos en la base de datos.
- * La integración con RabbitMQ se agregará posteriormente.
+ * Service for managing remote commands.
+ * Handles command creation, database persistence, and RabbitMQ message sending.
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommandService {
 
     private final CommandRepository commandRepository;
     private final ComputerRepository computerRepository;
+    private final RabbitMQService rabbitMQService;
 
     /**
-     * Crea un nuevo comando para un computador.
-     * Valida que el computador exista antes de crear el comando.
+     * Creates a new command for a computer.
+     * Validates that the computer exists before creating the command.
      *
-     * @param request CommandRequest con los datos del comando
-     * @return Command creado
-     * @throws IllegalArgumentException Si el computador no existe
+     * @param request CommandRequest with command data
+     * @return Created command
+     * @throws IllegalArgumentException If computer does not exist
      */
     @Transactional
     public Command createCommand(CommandRequest request) {
-        Computer computer = computerRepository.findByName(request.getComputerName())
-                .orElseThrow(() -> new IllegalArgumentException("Computer not found: " + request.getComputerName()));
+        if (!computerRepository.existsByName(request.getComputerName())) {
+            throw new IllegalArgumentException("Computer not found: " + request.getComputerName());
+        }
 
         Command command = Command.builder()
                 .computerName(request.getComputerName())
@@ -45,35 +48,66 @@ public class CommandService {
                 .sentAt(LocalDateTime.now())
                 .build();
 
-        return commandRepository.save(command);
+        command = commandRepository.save(command);
+
+        try {
+            CommandMessage message = CommandMessage.builder()
+                    .commandId(command.getId())
+                    .computerName(command.getComputerName())
+                    .commandType(command.getCommandType())
+                    .parameters(command.getParameters())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            rabbitMQService.sendCommand(message);
+            command.setStatus(Command.CommandStatus.SENT);
+            command = commandRepository.save(command);
+            log.info("Command {} sent to RabbitMQ successfully", command.getId());
+        } catch (Exception e) {
+            log.error("Failed to send command {} to RabbitMQ: {}", command.getId(), e.getMessage());
+            command.setStatus(Command.CommandStatus.FAILED);
+            command.setResultMessage("Failed to send to RabbitMQ: " + e.getMessage());
+            command = commandRepository.save(command);
+        }
+
+        return command;
     }
 
     /**
-     * Obtiene todos los comandos de un computador específico.
+     * Gets all commands.
      *
-     * @param computerName Nombre del computador
-     * @return Lista de comandos
+     * @return List of all commands
+     */
+    public List<Command> getAllCommands() {
+        return commandRepository.findAll();
+    }
+
+    /**
+     * Gets all commands for a specific computer.
+     *
+     * @param computerName Computer name
+     * @return List of commands
      */
     public List<Command> getCommandsByComputer(String computerName) {
         return commandRepository.findByComputerName(computerName);
     }
 
     /**
-     * Obtiene todos los comandos con un estado específico.
+     * Gets all commands with a specific status.
      *
-     * @param status Estado del comando
-     * @return Lista de comandos
+     * @param status Command status
+     * @return List of commands
      */
     public List<Command> getCommandsByStatus(Command.CommandStatus status) {
         return commandRepository.findByStatus(status);
     }
 
     /**
-     * Obtiene un comando por su ID.
+     * Gets a command by its ID.
      *
-     * @param id ID del comando
-     * @return Command encontrado
-     * @throws IllegalArgumentException Si el comando no existe
+     * @param id Command ID
+     * @return Found command
+     * @throws IllegalArgumentException If command does not exist
      */
     public Command getCommandById(Long id) {
         return commandRepository.findById(id)
@@ -81,13 +115,13 @@ public class CommandService {
     }
 
     /**
-     * Actualiza el estado de un comando.
-     * Usado cuando el agente C# reporta el resultado de la ejecución.
+     * Updates a command's status.
+     * Used when the C# agent reports the execution result.
      *
-     * @param commandId ID del comando
-     * @param status Nuevo estado
-     * @param resultMessage Mensaje de resultado (opcional)
-     * @return Command actualizado
+     * @param commandId Command ID
+     * @param status New status
+     * @param resultMessage Result message (optional)
+     * @return Updated command
      */
     @Transactional
     public Command updateCommandStatus(Long commandId, Command.CommandStatus status, String resultMessage) {

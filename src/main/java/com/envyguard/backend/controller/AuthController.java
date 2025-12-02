@@ -2,6 +2,7 @@ package com.envyguard.backend.controller;
 
 import com.envyguard.backend.dto.LoginRequest;
 import com.envyguard.backend.dto.LoginResponse;
+import com.envyguard.backend.dto.RegisterRequest;
 import com.envyguard.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controlador REST para autenticación y registro de usuarios.
+ * REST controller for user authentication and registration.
  */
 @RestController
 @RequestMapping("/auth")
@@ -23,10 +24,10 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * Endpoint para autenticación de usuarios.
+     * Authenticates a user and returns a JWT token.
      *
-     * @param request LoginRequest con email y password
-     * @return LoginResponse con token JWT
+     * @param request LoginRequest containing email and password
+     * @return LoginResponse with JWT token
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -35,19 +36,19 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para registro de nuevos usuarios.
+     * Registers a new user in the system.
      *
-     * @param request Mapa con email, password, firstName, lastName
-     * @return Mensaje de éxito
+     * @param request RegisterRequest containing email, password, firstName, lastName
+     * @return Success message
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
-        String firstName = request.get("firstName");
-        String lastName = request.get("lastName");
-
-        authService.register(email, password, firstName, lastName);
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(
+                request.getEmail(),
+                request.getPassword(),
+                request.getFirstName(),
+                request.getLastName()
+        );
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "User registered successfully");
@@ -55,9 +56,9 @@ public class AuthController {
     }
 
     /**
-     * Endpoint de salud para verificar que el servicio está activo.
+     * Health check endpoint to verify service status.
      *
-     * @return Estado del servicio
+     * @return Service status
      */
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {

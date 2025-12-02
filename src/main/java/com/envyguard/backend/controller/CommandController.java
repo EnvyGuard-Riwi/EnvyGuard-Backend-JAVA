@@ -9,12 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Controlador REST para gestión de comandos remotos.
+ * REST controller for remote command management.
  */
 @RestController
 @RequestMapping("/commands")
@@ -24,11 +23,11 @@ public class CommandController {
     private final CommandService commandService;
 
     /**
-     * Crea un nuevo comando para un computador.
+     * Creates a new command for a computer.
      * Endpoint: POST /api/commands
      *
-     * @param request CommandRequest con los datos del comando
-     * @return Command creado con estado PENDING
+     * @param request CommandRequest with command data
+     * @return Created command with PENDING status
      */
     @PostMapping
     public ResponseEntity<Command> createCommand(@Valid @RequestBody CommandRequest request) {
@@ -37,11 +36,11 @@ public class CommandController {
     }
 
     /**
-     * Obtiene todos los comandos de un computador específico.
+     * Gets all commands for a specific computer.
      * Endpoint: GET /api/commands/computer/{computerName}
      *
-     * @param computerName Nombre del computador
-     * @return Lista de comandos
+     * @param computerName Computer name
+     * @return List of commands
      */
     @GetMapping("/computer/{computerName}")
     public ResponseEntity<List<Command>> getCommandsByComputer(@PathVariable String computerName) {
@@ -50,11 +49,11 @@ public class CommandController {
     }
 
     /**
-     * Obtiene un comando por su ID.
+     * Gets a command by its ID.
      * Endpoint: GET /api/commands/{id}
      *
-     * @param id ID del comando
-     * @return Command encontrado
+     * @param id Command ID
+     * @return Found command
      */
     @GetMapping("/{id}")
     public ResponseEntity<Command> getCommandById(@PathVariable Long id) {
@@ -63,11 +62,23 @@ public class CommandController {
     }
 
     /**
-     * Obtiene todos los comandos con un estado específico.
+     * Gets all commands.
+     * Endpoint: GET /api/commands
+     *
+     * @return List of all commands
+     */
+    @GetMapping
+    public ResponseEntity<List<Command>> getAllCommands() {
+        List<Command> commands = commandService.getAllCommands();
+        return ResponseEntity.ok(commands);
+    }
+
+    /**
+     * Gets all commands with a specific status.
      * Endpoint: GET /api/commands/status/{status}
      *
-     * @param status Estado del comando (PENDING, SENT, EXECUTED, FAILED)
-     * @return Lista de comandos
+     * @param status Command status (PENDING, SENT, EXECUTED, FAILED)
+     * @return List of commands
      */
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Command>> getCommandsByStatus(@PathVariable Command.CommandStatus status) {
@@ -76,12 +87,12 @@ public class CommandController {
     }
 
     /**
-     * Endpoint para que el agente C# reporte el resultado de un comando.
+     * Endpoint for C# agent to report command execution result.
      * Endpoint: PUT /api/commands/{id}/status
      *
-     * @param id ID del comando
-     * @param request Mapa con status y resultMessage
-     * @return Command actualizado
+     * @param id Command ID
+     * @param request Map with status and resultMessage
+     * @return Updated command
      */
     @PutMapping("/{id}/status")
     public ResponseEntity<Command> updateCommandStatus(

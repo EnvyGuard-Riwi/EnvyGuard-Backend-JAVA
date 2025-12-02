@@ -8,11 +8,13 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
- * Configuración de RabbitMQ.
- * Define las colas y la serialización de mensajes.
- * Por ahora está configurado pero no se usará hasta conectar RabbitMQ.
+ * RabbitMQ configuration.
+ * Defines queues and message serialization.
+ * Currently configured but not used until RabbitMQ is connected.
  */
 @Configuration
 public class RabbitMQConfig {
@@ -21,9 +23,9 @@ public class RabbitMQConfig {
     public static final String PC_RESPONSES_QUEUE = "pc_responses";
 
     /**
-     * Define la cola para comandos enviados a los agentes C#.
+     * Defines the queue for commands sent to C# agents.
      *
-     * @return Queue configurada
+     * @return Configured queue
      */
     @Bean
     public Queue pcCommandsQueue() {
@@ -31,9 +33,9 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Define la cola para respuestas de los agentes C#.
+     * Defines the queue for responses from C# agents.
      *
-     * @return Queue configurada
+     * @return Configured queue
      */
     @Bean
     public Queue pcResponsesQueue() {
@@ -41,20 +43,22 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Configura el convertidor de mensajes a JSON.
+     * Configures the JSON message converter.
      *
-     * @return MessageConverter configurado
+     * @return Configured message converter
      */
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     /**
-     * Configura el RabbitTemplate con el convertidor JSON.
+     * Configures RabbitTemplate with JSON converter.
      *
-     * @param connectionFactory ConnectionFactory de RabbitMQ
-     * @return RabbitTemplate configurado
+     * @param connectionFactory RabbitMQ connection factory
+     * @return Configured RabbitTemplate
      */
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
@@ -64,10 +68,10 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Configura el listener container factory para recibir mensajes.
+     * Configures the listener container factory for receiving messages.
      *
-     * @param connectionFactory ConnectionFactory de RabbitMQ
-     * @return SimpleRabbitListenerContainerFactory configurado
+     * @param connectionFactory RabbitMQ connection factory
+     * @return Configured SimpleRabbitListenerContainerFactory
      */
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
