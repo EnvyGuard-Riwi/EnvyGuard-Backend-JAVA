@@ -9,8 +9,8 @@ spring:
   
   datasource:
     url: jdbc:postgresql://localhost:5432/envyguard_db
-    username: envyguard_user
-    password: your_password_here
+    username: postgres  # Cambia esto si no es 'postgres'
+    password: Qwe.123*  # La que usas para psql
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -19,9 +19,9 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   
+  # RabbitMQ (si lo vas a usar)
   rabbitmq:
     host: localhost
     port: 5672
@@ -31,9 +31,16 @@ spring:
 app:
   security:
     jwt:
-      secret: your_jwt_secret_key_min_256_bits_here_change_in_production
-      expiration: 86400000 # 24 hours in milliseconds
-  rabbitmq:
-    queue:
-      commands: pc_commands
-      responses: pc_responses
+      secret: EnvyGuardSecretKeyForJWT256BitsSecurity2024ChangeThisInProduction
+      expiration: 86400000 # 24 horas en milisegundos
+  
+  admin:
+    email: "admin@envyguard.com"
+    password: "Admin123!"
+    firstName: "EnvyGuard"
+    lastName: "Administrator"
+
+logging:
+  level:
+    com.envyguard: DEBUG
+    org.springframework.security: DEBUG
