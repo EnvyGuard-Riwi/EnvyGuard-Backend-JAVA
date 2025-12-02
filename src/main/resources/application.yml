@@ -8,9 +8,9 @@ spring:
     name: envyguard-backend
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/envyguard_db
-    username: postgres  # Cambia esto si no es 'postgres'
-    password: Qwe.123*  # La que usas para psql
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:envyguard_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -31,14 +31,14 @@ spring:
 app:
   security:
     jwt:
-      secret: EnvyGuardSecretKeyForJWT256BitsSecurity2024ChangeThisInProduction
-      expiration: 86400000 # 24 horas en milisegundos
+      secret: ${JWT_SECRET:EnvyGuardSecretKeyForJWT256BitsSecurity2024ChangeThisInProduction}
+      expiration: ${JWT_EXPIRATION:86400000}
   
   admin:
-    email: "admin@envyguard.com"
-    password: "Admin123!"
-    firstName: "EnvyGuard"
-    lastName: "Administrator"
+    email: ${ADMIN_EMAIL:admin@envyguard.com}
+    password: ${ADMIN_PASSWORD:Admin123!}
+    firstName: ${ADMIN_FIRST_NAME:EnvyGuard}
+    lastName: ${ADMIN_LAST_NAME:Administrator}
 
 logging:
   level:

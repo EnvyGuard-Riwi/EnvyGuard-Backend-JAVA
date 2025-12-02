@@ -3,6 +3,7 @@ com/envyguard/envyguard_backend/controller/HealthController.class
 com/envyguard/envyguard_backend/repository/ComputerRepository.class
 com/envyguard/envyguard_backend/security/UserDetailsImpl.class
 com/envyguard/envyguard_backend/repository/CommandRepository.class
+com/envyguard/envyguard_backend/security/config/SecurityConfig.class
 com/envyguard/envyguard_backend/controller/AuthController.class
 com/envyguard/envyguard_backend/security/SecurityConfig.class
 com/envyguard/envyguard_backend/entity/Computer.class

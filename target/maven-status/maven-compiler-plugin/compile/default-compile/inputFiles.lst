@@ -8,6 +8,7 @@
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/dto/LoginRequest.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/dto/RegisterRequest.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/entity/Command.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/config/SecurityConfig.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/EnvyGuardApplication.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/security/SecurityConfig.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/envyguard_backend/entity/User.java

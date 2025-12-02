@@ -48,7 +48,7 @@ public class DataInitializerService implements CommandLineRunner {
             System.out.println("==========================================");
             System.out.println("ADMIN USER CREATED SUCCESSFULLY");
             System.out.println("Email: " + adminEmail);
-            System.out.println("Password: " + adminPassword);
+            System.out.println("Note: Store the admin password securely. Do not commit to version control.");
             System.out.println("==========================================");
         } else {
             System.out.println("Admin user already exists");
