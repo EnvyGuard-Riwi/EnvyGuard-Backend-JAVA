@@ -30,7 +30,7 @@ EnvyGuard Backend is a Spring Boot application that provides centralized managem
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/EnvyGuard-Riwi/EnvyGuard-Backend-JAVA.git
    cd EnvyGuard-Backend-JAVA
    ```
 
