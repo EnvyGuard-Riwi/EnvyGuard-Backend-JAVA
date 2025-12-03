@@ -98,7 +98,19 @@ public class CommandController {
     public ResponseEntity<Command> updateCommandStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> request) {
-        Command.CommandStatus status = Command.CommandStatus.valueOf(request.get("status"));
+        String statusStr = request.get("status");
+        if (statusStr == null || statusStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Status is required and cannot be empty");
+        }
+        
+        Command.CommandStatus status;
+        try {
+            status = Command.CommandStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value: " + statusStr + 
+                    ". Valid values are: PENDING, SENT, EXECUTED, FAILED");
+        }
+        
         String resultMessage = request.get("resultMessage");
         
         Command command = commandService.updateCommandStatus(id, status, resultMessage);

@@ -45,7 +45,6 @@ public class CommandService {
                 .commandType(request.getCommandType())
                 .parameters(request.getParameters())
                 .status(Command.CommandStatus.PENDING)
-                .sentAt(LocalDateTime.now())
                 .build();
 
         command = commandRepository.save(command);
@@ -61,6 +60,7 @@ public class CommandService {
 
             rabbitMQService.sendCommand(message);
             command.setStatus(Command.CommandStatus.SENT);
+            command.setSentAt(LocalDateTime.now());
             command = commandRepository.save(command);
             log.info("Command {} sent to RabbitMQ successfully", command.getId());
         } catch (Exception e) {

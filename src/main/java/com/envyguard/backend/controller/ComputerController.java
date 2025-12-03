@@ -89,7 +89,19 @@ public class ComputerController {
     public ResponseEntity<Computer> updateComputerStatus(
             @PathVariable String name,
             @RequestBody Map<String, String> request) {
-        Computer.ComputerStatus status = Computer.ComputerStatus.valueOf(request.get("status"));
+        String statusStr = request.get("status");
+        if (statusStr == null || statusStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Status is required and cannot be empty");
+        }
+        
+        Computer.ComputerStatus status;
+        try {
+            status = Computer.ComputerStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value: " + statusStr + 
+                    ". Valid values are: ONLINE, OFFLINE, UNKNOWN");
+        }
+        
         Computer computer = computerService.updateComputerStatus(name, status);
         return ResponseEntity.ok(computer);
     }
