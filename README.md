@@ -177,25 +177,109 @@ docker compose up -d backend
 
 ## DNS Configuration
 
-When you have your domain, configure DNS:
+### Step 1: Configure DNS Record
 
-1. **Create A Record**
-   - Type: `A`
-   - Name: `api` (for `api.yourdomain.com`)
-   - Value: `91.99.188.229`
-   - TTL: `3600`
+In your DNS provider (where `crudzaso.com` is managed), create an A record:
 
-2. **Update Nginx** (if using reverse proxy)
+- **Type**: `A`
+- **Name**: `api.envyguard` (or just `api` if envyguard is a subdomain)
+- **Value**: `91.99.188.229`
+- **TTL**: `3600` (or `3600` seconds = 1 hour)
+
+**Note**: The exact name depends on your DNS structure:
+- If `envyguard.crudzaso.com` is a subdomain, use `api` as the name
+- If you want `api.envyguard.crudzaso.com`, ensure the name is `api.envyguard`
+
+### Step 2: Install and Configure Nginx
+
+1. **Install Nginx** (if not already installed):
    ```bash
-   sudo nano /etc/nginx/sites-available/envyguard
+   sudo apt update
+   sudo apt install -y nginx
    ```
-   Change `server_name` to your domain.
 
-3. **Configure SSL**
+2. **Copy the configuration file**:
    ```bash
-   sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d api.yourdomain.com
+   # From the project directory
+   sudo cp nginx-api.conf /etc/nginx/sites-available/api-envyguard
    ```
+
+3. **Enable the site**:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/api-envyguard /etc/nginx/sites-enabled/
+   ```
+
+4. **Test Nginx configuration**:
+   ```bash
+   sudo nginx -t
+   ```
+
+5. **Reload Nginx**:
+   ```bash
+   sudo systemctl reload nginx
+   ```
+
+6. **Enable Nginx to start on boot**:
+   ```bash
+   sudo systemctl enable nginx
+   ```
+
+### Step 3: Configure Firewall
+
+Allow HTTP and HTTPS traffic:
+
+```bash
+sudo ufw allow 'Nginx Full'
+# Or manually:
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+### Step 4: Configure SSL with Let's Encrypt
+
+1. **Install Certbot**:
+   ```bash
+   sudo apt install -y certbot python3-certbot-nginx
+   ```
+
+2. **Obtain SSL certificate**:
+   ```bash
+   sudo certbot --nginx -d api.envyguard.crudzaso.com
+   ```
+
+3. **Test automatic renewal**:
+   ```bash
+   sudo certbot renew --dry-run
+   ```
+
+Certbot will automatically update your Nginx configuration to use HTTPS.
+
+### Step 5: Verify Configuration
+
+1. **Check DNS propagation** (wait a few minutes after creating the DNS record):
+   ```bash
+   dig api.envyguard.crudzaso.com
+   # or
+   nslookup api.envyguard.crudzaso.com
+   ```
+
+2. **Test the API**:
+   ```bash
+   curl http://api.envyguard.crudzaso.com/api/auth/health
+   # After SSL:
+   curl https://api.envyguard.crudzaso.com/api/auth/health
+   ```
+
+3. **Access Swagger UI**:
+   - HTTP: `http://api.envyguard.crudzaso.com/api/swagger-ui/index.html`
+   - HTTPS: `https://api.envyguard.crudzaso.com/api/swagger-ui/index.html`
+
+### Troubleshooting
+
+- **DNS not resolving**: Wait 5-15 minutes for DNS propagation, or check your DNS provider's settings
+- **502 Bad Gateway**: Ensure the backend container is running: `sudo docker ps`
+- **Connection refused**: Check that port 8080 is accessible: `curl http://localhost:8080/api/auth/health`
+- **Nginx errors**: Check logs: `sudo tail -f /var/log/nginx/api-envyguard-error.log`
 
 ## Project Structure
 
