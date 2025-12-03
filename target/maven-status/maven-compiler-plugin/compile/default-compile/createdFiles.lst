@@ -23,7 +23,9 @@ com/envyguard/backend/service/ComputerService.class
 com/envyguard/backend/controller/ComputerController.class
 com/envyguard/backend/entity/Computer.class
 com/envyguard/backend/dto/CommandMessage.class
+com/envyguard/backend/dto/UserResponse$UserResponseBuilder.class
 com/envyguard/backend/service/JwtService.class
+com/envyguard/backend/dto/UserResponse.class
 com/envyguard/backend/config/RabbitMQConfig.class
 com/envyguard/backend/entity/Computer$ComputerStatus.class
 com/envyguard/backend/entity/Command$CommandBuilder.class

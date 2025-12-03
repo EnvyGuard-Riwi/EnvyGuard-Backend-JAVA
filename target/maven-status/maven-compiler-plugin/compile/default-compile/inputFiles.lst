@@ -13,6 +13,7 @@
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/LoginRequest.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/LoginResponse.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/RegisterRequest.java
+/home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/UserResponse.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/Command.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/Computer.java
 /home/javaspringboot/Documentos/code/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/User.java

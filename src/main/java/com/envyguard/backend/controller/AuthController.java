@@ -3,6 +3,7 @@ package com.envyguard.backend.controller;
 import com.envyguard.backend.dto.LoginRequest;
 import com.envyguard.backend.dto.LoginResponse;
 import com.envyguard.backend.dto.RegisterRequest;
+import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,5 +68,16 @@ public class AuthController {
         response.put("status", "UP");
         response.put("service", "auth");
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return List of all users
+     */
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = authService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 }

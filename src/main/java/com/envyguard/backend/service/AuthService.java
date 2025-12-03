@@ -2,6 +2,7 @@ package com.envyguard.backend.service;
 
 import com.envyguard.backend.dto.LoginRequest;
 import com.envyguard.backend.dto.LoginResponse;
+import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Service for handling user authentication and registration.
@@ -76,5 +79,24 @@ public class AuthService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
+    }
+
+    /**
+     * Retrieves all users from the system.
+     *
+     * @return List of UserResponse objects containing user information
+     */
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .enabled(user.getEnabled())
+                        .createdAt(user.getCreatedAt())
+                        .build())
+                .toList();
     }
 }
