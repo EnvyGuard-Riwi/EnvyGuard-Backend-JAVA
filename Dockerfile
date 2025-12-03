@@ -2,16 +2,20 @@ FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
 
+# Install Maven
+RUN apk add --no-cache maven
+
+# Copy pom.xml first for better layer caching
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
 
-RUN chmod +x ./mvnw
-RUN ./mvnw dependency:go-offline
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B
 
+# Copy source code
 COPY src ./src
 
-RUN ./mvnw clean package -DskipTests
+# Build the application
+RUN mvn clean package -DskipTests -B
 
 FROM eclipse-temurin:21-jre-alpine
 
