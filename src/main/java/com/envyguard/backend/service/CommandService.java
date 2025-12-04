@@ -42,7 +42,9 @@ public class CommandService {
 
         Command command = Command.builder()
                 .computerName(request.getComputerName())
-                .commandType(request.getCommandType())
+                .action(request.getAction())
+                .targetIp(request.getTargetIp())
+                .macAddress(request.getMacAddress())
                 .parameters(request.getParameters())
                 .status(Command.CommandStatus.PENDING)
                 .build();
@@ -53,7 +55,9 @@ public class CommandService {
             CommandMessage message = CommandMessage.builder()
                     .commandId(command.getId())
                     .computerName(command.getComputerName())
-                    .commandType(command.getCommandType())
+                    .action(command.getAction())
+                    .targetIp(command.getTargetIp())
+                    .macAddress(command.getMacAddress())
                     .parameters(command.getParameters())
                     .timestamp(LocalDateTime.now())
                     .build();

@@ -21,9 +21,14 @@ public class Command {
     @Column(name = "computer_name", nullable = false)
     private String computerName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "command_type", nullable = false)
-    private CommandType commandType;
+    @Column(name = "target_ip")
+    private String targetIp;
+
+    @Column(name = "mac_address")
+    private String macAddress;
+
+    @Column(name = "action", nullable = false)
+    private String action;
 
     @Column(columnDefinition = "TEXT")
     private String parameters;
