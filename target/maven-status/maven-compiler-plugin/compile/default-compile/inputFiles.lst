@@ -18,7 +18,6 @@
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/dto/UserResponse.java
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/Command.java
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/Computer.java
-/home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/Role.java
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/entity/User.java
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/exception/GlobalExceptionHandler.java
 /home/javaspringboot/Documentos/GitHub/EnvyGuard-Backend-JAVA/src/main/java/com/envyguard/backend/listener/CommandResponseListener.java
