@@ -62,17 +62,23 @@ public class AuthService {
      * @param request Login request with email and password
      * @return LoginResponse with JWT token and user data
      * @throws org.springframework.security.core.AuthenticationException If credentials are invalid
+     * @throws IllegalArgumentException If user is disabled
      */
     public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Verificar si el usuario está activo
+        if (!user.getEnabled()) {
+            throw new IllegalArgumentException("User account is disabled");
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         String jwtToken = jwtService.generateToken(user);
 
