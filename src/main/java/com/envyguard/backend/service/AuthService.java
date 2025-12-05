@@ -6,6 +6,7 @@ import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,15 +20,17 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     /**
-     * Registers a new user in the system.
+     * Registers a new user in the system and sends welcome email with credentials.
      *
      * @param email User email
      * @param password Unencrypted password
@@ -50,7 +53,18 @@ public class AuthService {
                 .enabled(true)
                 .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Send welcome email with credentials
+        try {
+            emailService.sendWelcomeEmail(email, firstName, email, password);
+            log.info("Welcome email sent to user: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to user {}: {}", email, e.getMessage());
+            // Note: We don't throw exception here to avoid breaking registration process
+        }
+
+        return savedUser;
     }
 
     /**

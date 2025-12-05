@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to EnvyGuard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .welcome {
+            font-size: 24px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .credentials {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .credential-item {
+            margin: 10px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .login-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .security-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">EnvyGuard</div>
+            <h1 class="welcome">Welcome to EnvyGuard!</h1>
+        </div>
+        
+        <p>Dear <strong th:text="${firstName}">User</strong>,</p>
+        
+        <p>Your account has been successfully created in our system. Below are your login credentials:</p>
+        
+        <div class="credentials">
+            <div class="credential-item">
+                <span class="label">Email:</span>
+                <div class="value" th:text="${email}">user@example.com</div>
+            </div>
+            <div class="credential-item">
+                <span class="label">Password:</span>
+                <div class="value" th:text="${password}">your-password</div>
+            </div>
+        </div>
+        
+        <div class="security-note">
+            <strong>⚠️ Security Notice:</strong> Please keep your credentials secure and change your password after your first login for enhanced security.
+        </div>
+        
+        <p>You can now access your account by clicking the button below:</p>
+        
+        <div style="text-align: center;">
+            <a th:href="${loginUrl}" class="login-button">Login to Your Account</a>
+        </div>
+        
+        <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        
+        <div class="footer">
+            <p>Best regards,<br>The EnvyGuard Team</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
