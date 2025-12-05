@@ -3,10 +3,10 @@ package com.envyguard.backend.service;
 import com.envyguard.backend.dto.LoginRequest;
 import com.envyguard.backend.dto.LoginResponse;
 import com.envyguard.backend.dto.UserResponse;
-import com.envyguard.backend.entity.Role;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,26 +20,27 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     /**
-     * Registers a new user in the system.
+     * Registers a new user in the system and sends welcome email with credentials.
      *
      * @param email User email
      * @param password Unencrypted password
      * @param firstName User first name
      * @param lastName User last name
-     * @param role User role (ADMIN or OPERATOR), defaults to OPERATOR if null
      * @return Created user
      * @throws IllegalArgumentException If email already exists
      */
     @Transactional
-    public User register(String email, String password, String firstName, String lastName, Role role) {
+    public User register(String email, String password, String firstName, String lastName) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -49,11 +50,21 @@ public class AuthService {
                 .password(passwordEncoder.encode(password))
                 .firstName(firstName)
                 .lastName(lastName)
-                .role(role != null ? role : Role.OPERATOR)
                 .enabled(true)
                 .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Send welcome email with credentials
+        try {
+            emailService.sendWelcomeEmail(email, firstName, email, password);
+            log.info("Welcome email sent to user: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to user {}: {}", email, e.getMessage());
+            // Note: We don't throw exception here to avoid breaking registration process
+        }
+
+        return savedUser;
     }
 
     /**
@@ -97,7 +108,6 @@ public class AuthService {
                         .email(user.getEmail())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
-                        .role(user.getRole())
                         .enabled(user.getEnabled())
                         .createdAt(user.getCreatedAt())
                         .build())

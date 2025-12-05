@@ -1,6 +1,5 @@
 package com.envyguard.backend.dto;
 
-import com.envyguard.backend.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -29,7 +28,5 @@ public class RegisterRequest {
 
     @NotBlank(message = "Last name is required")
     private String lastName;
-
-    private Role role; // Opcional, por defecto será OPERATOR
 }
 

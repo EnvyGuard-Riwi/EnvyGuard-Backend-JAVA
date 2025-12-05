@@ -1,6 +1,5 @@
 package com.envyguard.backend.dto;
 
-import com.envyguard.backend.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
@@ -29,8 +28,6 @@ public class UpdateUserRequest {
 
     @Size(max = 50)
     private String lastName;
-
-    private Role role;
 
     private Boolean enabled;
 }

@@ -40,7 +40,7 @@ public class AuthController {
     /**
      * Registers a new user in the system.
      *
-     * @param request RegisterRequest containing email, password, firstName, lastName, role
+     * @param request RegisterRequest containing email, password, firstName, lastName
      * @return Success message
      */
     @PostMapping("/register")
@@ -49,8 +49,7 @@ public class AuthController {
                 request.getEmail(),
                 request.getPassword(),
                 request.getFirstName(),
-                request.getLastName(),
-                request.getRole()
+                request.getLastName()
         );
 
         Map<String, String> response = new HashMap<>();
