@@ -39,6 +39,7 @@ public class UserService {
 
         Optional.ofNullable(req.getFirstName()).ifPresent(user::setFirstName);
         Optional.ofNullable(req.getLastName()).ifPresent(user::setLastName);
+        Optional.ofNullable(req.getRole()).ifPresent(user::setRole);
         Optional.ofNullable(req.getEnabled()).ifPresent(user::setEnabled);
 
         User saved = userRepository.save(user);
@@ -48,8 +49,16 @@ public class UserService {
                 .email(saved.getEmail())
                 .firstName(saved.getFirstName())
                 .lastName(saved.getLastName())
+                .role(saved.getRole())
                 .enabled(saved.getEnabled())
                 .createdAt(saved.getCreatedAt())
                 .build();
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        userRepository.delete(user);
     }
 }
