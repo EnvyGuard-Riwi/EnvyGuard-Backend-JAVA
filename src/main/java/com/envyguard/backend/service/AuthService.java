@@ -3,6 +3,7 @@ package com.envyguard.backend.service;
 import com.envyguard.backend.dto.LoginRequest;
 import com.envyguard.backend.dto.LoginResponse;
 import com.envyguard.backend.dto.UserResponse;
+import com.envyguard.backend.entity.Role;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +34,12 @@ public class AuthService {
      * @param password Unencrypted password
      * @param firstName User first name
      * @param lastName User last name
+     * @param role User role (ADMIN or OPERATOR), defaults to OPERATOR if null
      * @return Created user
      * @throws IllegalArgumentException If email already exists
      */
     @Transactional
-    public User register(String email, String password, String firstName, String lastName) {
+    public User register(String email, String password, String firstName, String lastName, Role role) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -47,6 +49,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(password))
                 .firstName(firstName)
                 .lastName(lastName)
+                .role(role != null ? role : Role.OPERATOR)
                 .enabled(true)
                 .build();
 
@@ -94,6 +97,7 @@ public class AuthService {
                         .email(user.getEmail())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
+                        .role(user.getRole())
                         .enabled(user.getEnabled())
                         .createdAt(user.getCreatedAt())
                         .build())

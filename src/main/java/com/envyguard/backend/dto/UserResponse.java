@@ -1,5 +1,6 @@
 package com.envyguard.backend.dto;
 
+import com.envyguard.backend.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class UserResponse {
     private String email;
     private String firstName;
     private String lastName;
+    private Role role;
     private Boolean enabled;
     private LocalDateTime createdAt;
 }
