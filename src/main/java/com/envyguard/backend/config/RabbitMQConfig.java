@@ -48,6 +48,7 @@ public class RabbitMQConfig {
      * @return Configured message converter
      */
     @Bean
+    @java.lang.SuppressWarnings("removal")
     public MessageConverter jsonMessageConverter() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
