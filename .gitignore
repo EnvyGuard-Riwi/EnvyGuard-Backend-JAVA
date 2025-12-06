@@ -1,0 +1,113 @@
+# ===========================================
+# EnvyGuard Backend - .gitignore
+# ===========================================
+
+# ============ Build output ============
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# ============ IDE ============
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ============ Maven ============
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ============ Gradle ============
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# ============ Logs ============
+*.log
+logs/
+spring.log
+
+# ============ Environment & Secrets ============
+.env
+.env.*
+!.env.example
+env.local
+application-local.properties
+application-local.yml
+secrets/
+*.pem
+*.key
+*.p12
+*.jks
+
+# ============ OS Files ============
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============ Docker ============
+docker-compose.override.yml
+.docker/
+
+# ============ Temporary files ============
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+\#*\#
+
+# ============ Test & Coverage ============
+/coverage/
+*.lcov
+.nyc_output/
+test-results/
+surefire-reports/
+failsafe-reports/
+
+# ============ Spring Boot ============
+HELP.md
+.springBeans
+spring-shell.log
+
+# ============ JRebel ============
+rebel.xml
+
+# ============ Misc ============
+*.orig
+*.bak
