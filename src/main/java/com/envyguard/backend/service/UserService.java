@@ -50,7 +50,7 @@ public class UserService {
                 .firstName(saved.getFirstName())
                 .lastName(saved.getLastName())
                 .role(saved.getRole())
-                .enabled(saved.getEnabled())
+                .enabled(saved.isEnabled())
                 .createdAt(saved.getCreatedAt())
                 .build();
     }

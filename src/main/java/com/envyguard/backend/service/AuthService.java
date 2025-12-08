@@ -6,107 +6,93 @@ import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.entity.Role;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
+import com.envyguard.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Service for handling user authentication and registration.
- */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
-    /**
-     * Registers a new user in the system.
-     *
-     * @param email User email
-     * @param password Unencrypted password
-     * @param firstName User first name
-     * @param lastName User last name
-     * @param role User role (ADMIN or OPERATOR), defaults to OPERATOR if null
-     * @return Created user
-     * @throws IllegalArgumentException If email already exists
-     */
     @Transactional
     public User register(String email, String password, String firstName, String lastName, Role role) {
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        User user = User.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .firstName(firstName)
-                .lastName(lastName)
-                .role(role != null ? role : Role.OPERATOR)
-                .enabled(true)
-                .build();
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setRole(role != null ? role : Role.OPERATOR);
+        user.setEnabled(true);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Enviar correo con credenciales
+        try {
+            emailService.sendCredentials(email, email, password);
+        } catch (Exception e) {
+            log.error("Error al enviar correo: " + e.getMessage(), e);
+        }
+
+        return savedUser;
     }
 
-    /**
-     * Authenticates a user and generates a JWT token.
-     *
-     * @param request Login request with email and password
-     * @return LoginResponse with JWT token and user data
-     * @throws org.springframework.security.core.AuthenticationException If credentials are invalid
-     * @throws IllegalArgumentException If user is disabled
-     */
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Verificar si el usuario está activo
-        if (!user.getEnabled()) {
-            throw new IllegalArgumentException("User account is disabled");
-        }
-
-        authenticationManager.authenticate(
+        // Authenticate the user
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
 
-        String jwtToken = jwtService.generateToken(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        // Get the authenticated user
+        User user = (User) authentication.getPrincipal();
+        String token = jwtService.generateToken(user);
 
-        return LoginResponse.builder()
-                .token(jwtToken)
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .build();
+        // Create and populate the response
+        LoginResponse response = new LoginResponse();
+        response.setToken(token);
+        response.setEmail(user.getEmail());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        
+        return response;
     }
 
-    /**
-     * Retrieves all users from the system.
-     *
-     * @return List of UserResponse objects containing user information
-     */
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(user -> UserResponse.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .role(user.getRole())
-                        .enabled(user.getEnabled())
-                        .createdAt(user.getCreatedAt())
-                        .build())
-                .toList();
+        return userRepository.findAll().stream()
+                .map(user -> {
+                    UserResponse response = new UserResponse();
+                    response.setId(user.getId());
+                    response.setEmail(user.getEmail());
+                    response.setFirstName(user.getFirstName());
+                    response.setLastName(user.getLastName());
+                    response.setRole(user.getRole());
+                    response.setEnabled(user.isEnabled());
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 }
