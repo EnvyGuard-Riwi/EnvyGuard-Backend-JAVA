@@ -1,5 +1,6 @@
 package com.envyguard.backend.controller;
 
+import com.envyguard.backend.dto.ToggleUserStatusRequest;
 import com.envyguard.backend.dto.UpdateUserRequest;
 import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.service.AuthService;
@@ -59,6 +60,26 @@ public class UserController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok().body("Usuario eliminado correctamente");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Cambia el estado de habilitación de un usuario (enable/disable). Solo ADMIN.
+     * 
+     * @param id      ID del usuario
+     * @param request Objeto con el nuevo estado (enabled: true/false)
+     * @return Usuario actualizado
+     */
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> toggleUserStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody ToggleUserStatusRequest request) {
+        try {
+            UserResponse updated = userService.toggleUserStatus(id, request.getEnabled());
+            return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
