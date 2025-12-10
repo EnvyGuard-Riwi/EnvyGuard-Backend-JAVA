@@ -51,7 +51,7 @@ public class EmailService {
                                                 🛡️ EnvyGuard
                                             </h1>
                                             <p style="margin: 10px 0 0 0; color: #1a1a2e; font-size: 14px; font-weight: 500;">
-                                                Sistema de Gestión de Créditos
+                                                Sistema de Gestión de Dispositivos
                                             </p>
                                         </td>
                                     </tr>
