@@ -25,10 +25,11 @@ jobs:
             echo "📥 Pulling latest changes from main..."
             git pull origin main
             echo "🛑 Stopping containers..."
-            sudo docker compose down
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose down
             echo "🔨 Building and starting containers..."
-            sudo docker compose up -d --build
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --build
             echo "⏳ Waiting for health check..."
             sleep 30
             echo "✅ Deployment complete!"
-            sudo docker ps | grep envyguard
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker ps | grep envyguard
+
