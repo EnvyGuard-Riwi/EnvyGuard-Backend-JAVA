@@ -61,4 +61,30 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         userRepository.delete(user);
     }
+
+    /**
+     * Cambia el estado de habilitación de un usuario.
+     * 
+     * @param id      ID del usuario
+     * @param enabled true para habilitar, false para deshabilitar
+     * @return Usuario actualizado
+     */
+    @Transactional
+    public UserResponse toggleUserStatus(Long id, boolean enabled) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        user.setEnabled(enabled);
+        User saved = userRepository.save(user);
+
+        return UserResponse.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .firstName(saved.getFirstName())
+                .lastName(saved.getLastName())
+                .role(saved.getRole())
+                .enabled(saved.isEnabled())
+                .createdAt(saved.getCreatedAt())
+                .build();
+    }
 }

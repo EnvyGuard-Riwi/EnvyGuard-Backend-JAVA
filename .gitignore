@@ -64,6 +64,7 @@ spring.log
 env.local
 application-local.properties
 application-local.yml
+application-dev.properties
 secrets/
 *.pem
 *.key

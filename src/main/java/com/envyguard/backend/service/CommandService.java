@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,13 +19,19 @@ import java.util.List;
  * Handles command creation, database persistence, and RabbitMQ message sending.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class CommandService {
 
     private final CommandRepository commandRepository;
     private final ComputerRepository computerRepository;
-    private final RabbitMQService rabbitMQService;
+
+    @Autowired(required = false)
+    private RabbitMQService rabbitMQService;
+
+    public CommandService(CommandRepository commandRepository, ComputerRepository computerRepository) {
+        this.commandRepository = commandRepository;
+        this.computerRepository = computerRepository;
+    }
 
     /**
      * Creates a new command for a computer.
@@ -51,27 +58,32 @@ public class CommandService {
 
         command = commandRepository.save(command);
 
-        try {
-            CommandMessage message = CommandMessage.builder()
-                    .commandId(command.getId())
-                    .computerName(command.getComputerName())
-                    .action(command.getAction())
-                    .targetIp(command.getTargetIp())
-                    .macAddress(command.getMacAddress())
-                    .parameters(command.getParameters())
-                    .timestamp(LocalDateTime.now())
-                    .build();
+        // Only try to send to RabbitMQ if the service is available
+        if (rabbitMQService != null) {
+            try {
+                CommandMessage message = CommandMessage.builder()
+                        .commandId(command.getId())
+                        .computerName(command.getComputerName())
+                        .action(command.getAction())
+                        .targetIp(command.getTargetIp())
+                        .macAddress(command.getMacAddress())
+                        .parameters(command.getParameters())
+                        .timestamp(LocalDateTime.now())
+                        .build();
 
-            rabbitMQService.sendCommand(message);
-            command.setStatus(Command.CommandStatus.SENT);
-            command.setSentAt(LocalDateTime.now());
-            command = commandRepository.save(command);
-            log.info("Command {} sent to RabbitMQ successfully", command.getId());
-        } catch (Exception e) {
-            log.error("Failed to send command {} to RabbitMQ: {}", command.getId(), e.getMessage());
-            command.setStatus(Command.CommandStatus.FAILED);
-            command.setResultMessage("Failed to send to RabbitMQ: " + e.getMessage());
-            command = commandRepository.save(command);
+                rabbitMQService.sendCommand(message);
+                command.setStatus(Command.CommandStatus.SENT);
+                command.setSentAt(LocalDateTime.now());
+                command = commandRepository.save(command);
+                log.info("Command {} sent to RabbitMQ successfully", command.getId());
+            } catch (Exception e) {
+                log.error("Failed to send command {} to RabbitMQ: {}", command.getId(), e.getMessage());
+                command.setStatus(Command.CommandStatus.FAILED);
+                command.setResultMessage("Failed to send to RabbitMQ: " + e.getMessage());
+                command = commandRepository.save(command);
+            }
+        } else {
+            log.warn("RabbitMQ service not available. Command {} saved but not sent.", command.getId());
         }
 
         return command;
@@ -122,8 +134,8 @@ public class CommandService {
      * Updates a command's status.
      * Used when the C# agent reports the execution result.
      *
-     * @param commandId Command ID
-     * @param status New status
+     * @param commandId     Command ID
+     * @param status        New status
      * @param resultMessage Result message (optional)
      * @return Updated command
      */
@@ -132,11 +144,11 @@ public class CommandService {
         Command command = getCommandById(commandId);
         command.setStatus(status);
         command.setResultMessage(resultMessage);
-        
+
         if (status == Command.CommandStatus.EXECUTED || status == Command.CommandStatus.FAILED) {
             command.setExecutedAt(LocalDateTime.now());
         }
-        
+
         return commandRepository.save(command);
     }
 }
