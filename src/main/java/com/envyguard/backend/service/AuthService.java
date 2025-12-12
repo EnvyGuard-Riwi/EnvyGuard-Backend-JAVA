@@ -6,7 +6,6 @@ import com.envyguard.backend.dto.UserResponse;
 import com.envyguard.backend.entity.Role;
 import com.envyguard.backend.entity.User;
 import com.envyguard.backend.repository.UserRepository;
-import com.envyguard.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

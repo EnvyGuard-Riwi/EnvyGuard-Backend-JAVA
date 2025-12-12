@@ -2,11 +2,11 @@ package com.envyguard.backend.service;
 
 import com.envyguard.backend.dto.CommandMessage;
 import com.envyguard.backend.dto.CommandRequest;
-import com.envyguard.backend.entity.Command;
-import com.envyguard.backend.repository.CommandRepository;
-import com.envyguard.backend.repository.ComputerRepository;
-import lombok.RequiredArgsConstructor;
+import com.envyguard.backend.entity.*;
+import com.envyguard.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,42 +23,105 @@ import java.util.List;
 public class CommandService {
 
     private final CommandRepository commandRepository;
-    private final ComputerRepository computerRepository;
+    private final Sala1Repository sala1Repository;
+    private final Sala2Repository sala2Repository;
+    private final Sala3Repository sala3Repository;
+    private final Sala4Repository sala4Repository;
 
     @Autowired(required = false)
     private RabbitMQService rabbitMQService;
 
-    public CommandService(CommandRepository commandRepository, ComputerRepository computerRepository) {
+    public CommandService(CommandRepository commandRepository,
+                          Sala1Repository sala1Repository,
+                          Sala2Repository sala2Repository,
+                          Sala3Repository sala3Repository,
+                          Sala4Repository sala4Repository) {
         this.commandRepository = commandRepository;
-        this.computerRepository = computerRepository;
+        this.sala1Repository = sala1Repository;
+        this.sala2Repository = sala2Repository;
+        this.sala3Repository = sala3Repository;
+        this.sala4Repository = sala4Repository;
     }
 
     /**
      * Creates a new command for a computer.
-     * Validates that the computer exists before creating the command.
+     * Validates that the computer exists in the specified sala before creating the command.
      *
-     * @param request CommandRequest with command data
+     * @param request CommandRequest with command data (salaNumber and pcId)
      * @return Created command
-     * @throws IllegalArgumentException If computer does not exist
+     * @throws IllegalArgumentException If computer does not exist in the specified sala
      */
     @Transactional
     public Command createCommand(CommandRequest request) {
-        if (!computerRepository.existsByName(request.getComputerName())) {
-            throw new IllegalArgumentException("Computer not found: " + request.getComputerName());
+        // Validar que salaNumber esté entre 1 y 4
+        Integer salaNumber = request.getSalaNumber();
+        if (salaNumber < 1 || salaNumber > 4) {
+            throw new IllegalArgumentException("Número de sala inválido: " + salaNumber + ". Debe estar entre 1 y 4.");
         }
 
+        // Buscar el PC en la sala correspondiente
+        String computerName = null;
+        String targetIp = null;
+        String macAddress = null;
+
+        switch (salaNumber) {
+            case 1:
+                Sala1 pc1 = sala1Repository.findById(request.getPcId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "PC no encontrado en Sala 1 con ID: " + request.getPcId()));
+                computerName = pc1.getNombrePc();
+                targetIp = pc1.getIp();
+                macAddress = pc1.getMac();
+                break;
+            case 2:
+                Sala2 pc2 = sala2Repository.findById(request.getPcId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "PC no encontrado en Sala 2 con ID: " + request.getPcId()));
+                computerName = pc2.getNombrePc();
+                targetIp = pc2.getIp();
+                macAddress = pc2.getMac();
+                break;
+            case 3:
+                Sala3 pc3 = sala3Repository.findById(request.getPcId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "PC no encontrado en Sala 3 con ID: " + request.getPcId()));
+                computerName = pc3.getNombrePc();
+                targetIp = pc3.getIp();
+                macAddress = pc3.getMac();
+                break;
+            case 4:
+                Sala4 pc4 = sala4Repository.findById(request.getPcId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "PC no encontrado en Sala 4 con ID: " + request.getPcId()));
+                computerName = pc4.getNombrePc();
+                targetIp = pc4.getIp();
+                macAddress = pc4.getMac();
+                break;
+        }
+
+        // Obtener el email del usuario autenticado
+        String userEmail = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            userEmail = authentication.getName();
+        }
+
+        // Crear el comando con toda la información
         Command command = Command.builder()
-                .computerName(request.getComputerName())
+                .salaNumber(salaNumber)
+                .pcId(request.getPcId())
+                .computerName(computerName)
+                .targetIp(targetIp)
+                .macAddress(macAddress)
                 .action(request.getAction())
-                .targetIp(request.getTargetIp())
-                .macAddress(request.getMacAddress())
                 .parameters(request.getParameters())
                 .status(Command.CommandStatus.PENDING)
+                .userEmail(userEmail)
                 .build();
 
         command = commandRepository.save(command);
 
-        // Only try to send to RabbitMQ if the service is available
+        // Intentar enviar a RabbitMQ si el servicio está disponible
         if (rabbitMQService != null) {
             try {
                 CommandMessage message = CommandMessage.builder()
@@ -75,15 +138,16 @@ public class CommandService {
                 command.setStatus(Command.CommandStatus.SENT);
                 command.setSentAt(LocalDateTime.now());
                 command = commandRepository.save(command);
-                log.info("Command {} sent to RabbitMQ successfully", command.getId());
+                log.info("Comando {} enviado a RabbitMQ exitosamente para {} en Sala {}", 
+                         command.getId(), computerName, salaNumber);
             } catch (Exception e) {
-                log.error("Failed to send command {} to RabbitMQ: {}", command.getId(), e.getMessage());
+                log.error("Error al enviar comando {} a RabbitMQ: {}", command.getId(), e.getMessage());
                 command.setStatus(Command.CommandStatus.FAILED);
-                command.setResultMessage("Failed to send to RabbitMQ: " + e.getMessage());
+                command.setResultMessage("Error al enviar a RabbitMQ: " + e.getMessage());
                 command = commandRepository.save(command);
             }
         } else {
-            log.warn("RabbitMQ service not available. Command {} saved but not sent.", command.getId());
+            log.warn("Servicio RabbitMQ no disponible. Comando {} guardado pero no enviado.", command.getId());
         }
 
         return command;
