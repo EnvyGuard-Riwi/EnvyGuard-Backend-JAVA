@@ -46,6 +46,17 @@ public class IncidentService {
     }
 
     /**
+     * Finds all incidents.
+     *
+     * @return List of all incidents
+     */
+    public List<IncidentResponse> findAll() {
+        return incidentRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Finds all incidents by status.
      *
      * @param status Incident status (PENDING/COMPLETED)

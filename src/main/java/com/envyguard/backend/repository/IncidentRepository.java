@@ -13,5 +13,7 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
 
     List<Incident> findAllByStatusOrderByCreatedAtDesc(IncidentStatus status);
 
-    List<Incident> findAllByStatusAndCompletedAtBefore(IncidentStatus status, LocalDateTime dateTime);
+    List<Incident> findAllByOrderByCreatedAtDesc();
+
+    List<Incident> findAllByStatusAndCompletedAtBefore(IncidentStatus status, LocalDateTime completedAt);
 }

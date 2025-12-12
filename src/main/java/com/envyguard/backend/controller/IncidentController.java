@@ -37,6 +37,12 @@ public class IncidentController {
         return ResponseEntity.ok(incidentService.findAllByStatus(status));
     }
 
+    @Operation(summary = "List all incidents", description = "Returns a list of all incidents without filtering.")
+    @GetMapping("/all")
+    public ResponseEntity<List<IncidentResponse>> findAll() {
+        return ResponseEntity.ok(incidentService.findAll());
+    }
+
     @Operation(summary = "Mark incident as completed", description = "Updates the status of an incident to COMPLETED.")
     @PatchMapping("/{id}/complete")
     public ResponseEntity<IncidentResponse> markAsCompleted(@PathVariable Long id) {
