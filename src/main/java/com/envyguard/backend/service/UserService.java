@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * Service for managing users.
+ */
 @Service
 public class UserService {
 
@@ -21,6 +24,13 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param id  User ID
+     * @param req Update request
+     * @return Updated user response
+     */
     @Transactional
     public UserResponse updateUser(Long id, UpdateUserRequest req) {
         User user = userRepository.findById(id)
@@ -55,6 +65,11 @@ public class UserService {
                 .build();
     }
 
+    /**
+     * Deletes a user by ID.
+     *
+     * @param id User ID
+     */
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
@@ -63,11 +78,11 @@ public class UserService {
     }
 
     /**
-     * Cambia el estado de habilitación de un usuario.
-     * 
-     * @param id      ID del usuario
-     * @param enabled true para habilitar, false para deshabilitar
-     * @return Usuario actualizado
+     * Toggles the enabled status of a user.
+     *
+     * @param id      User ID
+     * @param enabled true to enable, false to disable
+     * @return Updated user response
      */
     @Transactional
     public UserResponse toggleUserStatus(Long id, boolean enabled) {

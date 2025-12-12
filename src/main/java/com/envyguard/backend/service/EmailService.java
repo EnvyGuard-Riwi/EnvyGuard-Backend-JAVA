@@ -8,26 +8,36 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service for sending emails.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
     private final JavaMailSender mailSender;
 
+    /**
+     * Sends an email with account credentials.
+     *
+     * @param to       Recipient email
+     * @param email    User email (username)
+     * @param password User password
+     */
     public void sendCredentials(String to, String email, String password) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(to);
-            helper.setSubject("Bienvenido a EnvyGuard - Tus credenciales de acceso");
+            helper.setSubject("Bienvenido a EnvyGuard - Credenciales de Acceso");
             helper.setText(buildCredentialsEmailHtml(email, password), true);
 
             mailSender.send(mimeMessage);
-            log.info("Credenciales enviadas exitosamente a: {}", to);
+            log.info("Credentials sent successfully to: {}", to);
         } catch (MessagingException e) {
-            log.error("Error al enviar credenciales a {}: {}", to, e.getMessage());
-            throw new RuntimeException("Error al enviar el correo de credenciales", e);
+            log.error("Error sending credentials to {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error sending credentials email", e);
         }
     }
 

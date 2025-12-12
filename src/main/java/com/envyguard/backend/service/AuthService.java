@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for handling authentication and user registration.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    /**
+     * Registers a new user.
+     *
+     * @param email     User email
+     * @param password  User password
+     * @param firstName User first name
+     * @param lastName  User last name
+     * @param role      User role
+     * @return The registered User
+     */
     @Transactional
     public User register(String email, String password, String firstName, String lastName, Role role) {
         if (userRepository.existsByEmail(email)) {
@@ -45,42 +58,48 @@ public class AuthService {
         user.setEnabled(true);
 
         User savedUser = userRepository.save(user);
-        
-        // Enviar correo con credenciales
+
         try {
             emailService.sendCredentials(email, email, password);
         } catch (Exception e) {
-            log.error("Error al enviar correo: " + e.getMessage(), e);
+            log.error("Error sending email: " + e.getMessage(), e);
         }
 
         return savedUser;
     }
 
+    /**
+     * Authenticates a user.
+     *
+     * @param request Login request containing email and password
+     * @return Login response with JWT token and user details
+     */
     public LoginResponse login(LoginRequest request) {
-        // Authenticate the user
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        // Get the authenticated user
+
         User user = (User) authentication.getPrincipal();
         String token = jwtService.generateToken(user);
 
-        // Create and populate the response
         LoginResponse response = new LoginResponse();
         response.setToken(token);
         response.setEmail(user.getEmail());
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
-        
+
         return response;
     }
 
+    /**
+     * Retrieves all users.
+     *
+     * @return List of all users
+     */
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(user -> {
