@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: envyguard-postgres
     environment:
-      POSTGRES_DB: envyguard_database
+      POSTGRES_DB: envyguard_db
       POSTGRES_USER: envyguard_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
@@ -26,7 +26,7 @@ services:
     container_name: envyguard-backend
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/envyguard_database
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/envyguard_db
       SPRING_DATASOURCE_USERNAME: envyguard_user
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
