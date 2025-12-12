@@ -2,11 +2,13 @@ package com.envyguard.backend.controller;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/control")
 @CrossOrigin(origins = "*") // Permite que React llame a este endpoint
+@ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = false)
 public class SpyController {
 
     @Autowired
