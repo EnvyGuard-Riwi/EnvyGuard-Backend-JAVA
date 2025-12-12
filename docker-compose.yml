@@ -26,7 +26,7 @@ services:
     container_name: envyguard-backend
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/envyguard_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/envyguard_db_v2
       SPRING_DATASOURCE_USERNAME: envyguard_user
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
