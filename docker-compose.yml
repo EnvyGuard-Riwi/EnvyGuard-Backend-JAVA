@@ -3,18 +3,18 @@ services:
     image: postgres:16-alpine
     container_name: envyguard-postgres
     environment:
-      POSTGRES_DB: envyguard_db
+      POSTGRES_DB: envyguard_db_v2
       POSTGRES_USER: envyguard_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_v2:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - envyguard-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U envyguard_user"]
+      test: ["CMD-SHELL", "pg_isready -U envyguard_user -d envyguard_db_v2"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,5 +56,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  postgres_data_v2:
 
