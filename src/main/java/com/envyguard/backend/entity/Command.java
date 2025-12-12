@@ -21,16 +21,24 @@ public class Command {
     @Schema(description = "ID único del comando", example = "1")
     private Long id;
 
+    @Column(name = "sala_number", nullable = false)
+    @Schema(description = "Número de la sala donde está el PC (1-4)", example = "4")
+    private Integer salaNumber;
+
+    @Column(name = "pc_id", nullable = false)
+    @Schema(description = "ID del PC en la tabla sala_X", example = "1")
+    private Long pcId;
+
     @Column(name = "computer_name", nullable = false)
-    @Schema(description = "Nombre del equipo donde se ejecuta el comando", example = "PC-LAB-01")
+    @Schema(description = "Nombre del PC (ej: 'PC 1', obtenido automáticamente de sala_X)", example = "PC 1")
     private String computerName;
 
     @Column(name = "target_ip")
-    @Schema(description = "IP del equipo objetivo", example = "192.168.1.100")
+    @Schema(description = "IP del PC (obtenida automáticamente de sala_X)", example = "10.0.120.2")
     private String targetIp;
 
     @Column(name = "mac_address")
-    @Schema(description = "Dirección MAC del equipo", example = "00:1A:2B:3C:4D:5E")
+    @Schema(description = "MAC del PC (obtenida automáticamente de sala_X)", example = "08:bf:b8:03:13:0f")
     private String macAddress;
 
     @Column(name = "action", nullable = false)
@@ -62,6 +70,10 @@ public class Command {
     @Column(name = "created_at", updatable = false)
     @Schema(description = "Fecha y hora de creación del comando")
     private LocalDateTime createdAt;
+
+    @Column(name = "user_email")
+    @Schema(description = "Email del usuario que ejecutó el comando (para auditoría)", example = "admin@envyguard.com")
+    private String userEmail;
 
     @PrePersist
     protected void onCreate() {
