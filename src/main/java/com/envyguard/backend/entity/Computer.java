@@ -42,6 +42,12 @@ public class Computer {
     @Column(name = "lab_name")
     private String labName;
 
+    @Column(name = "room_number")
+    private Integer roomNumber;
+
+    @Column(name = "position_in_room")
+    private String positionInRoom;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
