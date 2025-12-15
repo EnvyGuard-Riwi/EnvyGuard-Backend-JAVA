@@ -1,9 +1,11 @@
 package com.envyguard.backend.service;
 
+import com.envyguard.backend.dto.AgentCommandMessage;
 import com.envyguard.backend.dto.CommandMessage;
 import com.envyguard.backend.dto.CommandRequest;
 import com.envyguard.backend.entity.*;
 import com.envyguard.backend.repository.*;
+import com.envyguard.backend.util.ActionMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -124,22 +126,44 @@ public class CommandService {
         // Intentar enviar a RabbitMQ si el servicio está disponible
         if (rabbitMQService != null) {
             try {
-                CommandMessage message = CommandMessage.builder()
-                        .commandId(command.getId())
-                        .computerName(command.getComputerName())
-                        .action(command.getAction())
-                        .targetIp(command.getTargetIp())
-                        .macAddress(command.getMacAddress())
-                        .parameters(command.getParameters())
-                        .timestamp(LocalDateTime.now())
-                        .build();
+                // Convertir acción del backend al formato del agente
+                String agentAction = ActionMapper.toAgentAction(command.getAction());
+                
+                // Construir mensaje en formato esperado por el agente C#
+                AgentCommandMessage agentMessage;
+                
+                if ("wakeup".equals(agentAction)) {
+                    // Wake-on-LAN: targetIp vacío, incluir macAddress
+                    agentMessage = AgentCommandMessage.builder()
+                            .action(agentAction)
+                            .targetIp("")
+                            .macAddress(command.getMacAddress())
+                            .parameters(command.getParameters() != null ? command.getParameters() : "")
+                            .build();
+                    log.debug("Mensaje Wake-on-LAN: action={}, macAddress={}", agentAction, command.getMacAddress());
+                } else {
+                    // Acciones normales: incluir targetIp, sin macAddress (será null y se excluirá del JSON)
+                    agentMessage = AgentCommandMessage.builder()
+                            .action(agentAction)
+                            .targetIp(command.getTargetIp())
+                            .macAddress(null) // Explícitamente null para excluir del JSON
+                            .parameters(command.getParameters() != null ? command.getParameters() : "")
+                            .build();
+                    log.debug("Mensaje normal: action={}, targetIp={}, parameters={}", 
+                             agentAction, command.getTargetIp(), command.getParameters());
+                }
 
-                rabbitMQService.sendCommand(message);
+                rabbitMQService.sendCommand(agentMessage);
                 command.setStatus(Command.CommandStatus.SENT);
                 command.setSentAt(LocalDateTime.now());
                 command = commandRepository.save(command);
-                log.info("Comando {} enviado a RabbitMQ exitosamente para {} en Sala {}", 
-                         command.getId(), computerName, salaNumber);
+                log.info("Comando {} enviado a RabbitMQ exitosamente para {} en Sala {} (action: {})", 
+                         command.getId(), computerName, salaNumber, agentAction);
+            } catch (IllegalArgumentException e) {
+                log.error("Acción inválida en comando {}: {}", command.getId(), e.getMessage());
+                command.setStatus(Command.CommandStatus.FAILED);
+                command.setResultMessage("Acción no válida: " + e.getMessage());
+                command = commandRepository.save(command);
             } catch (Exception e) {
                 log.error("Error al enviar comando {} a RabbitMQ: {}", command.getId(), e.getMessage());
                 command.setStatus(Command.CommandStatus.FAILED);

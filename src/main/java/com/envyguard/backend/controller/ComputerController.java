@@ -1,5 +1,9 @@
 package com.envyguard.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -8,33 +12,38 @@ import java.util.Map;
 /**
  * REST controller for computer management.
  * 
- * ⚠️ DEPRECADO: Este controlador está siendo reemplazado por la nueva arquitectura basada en Salas.
+ * ⚠️ DEPRECATED: This controller is being replaced by the new room-based architecture.
  * 
- * NUEVA ESTRUCTURA:
- * - Las computadoras ya no están en una tabla genérica 'computers'
- * - Ahora están organizadas por salas: sala_1, sala_2, sala_3, sala_4
- * - Cada PC tiene un ID único dentro de su sala
+ * NEW STRUCTURE:
+ * - Computers are no longer in a generic 'computers' table
+ * - Now organized by rooms: sala_1, sala_2, sala_3, sala_4
+ * - Each PC has a unique ID within its room
  * 
- * ENDPOINTS ACTUALIZADOS:
- * - Para enviar comandos, usa: POST /api/commands
- *   Ejemplo: {"salaNumber": 4, "pcId": 1, "action": "SHUTDOWN", "parameters": ""}
+ * UPDATED ENDPOINTS:
+ * - To send commands, use: POST /api/commands
+ *   Example: {"salaNumber": 4, "pcId": 1, "action": "SHUTDOWN", "parameters": ""}
  * 
- * - Para ver comandos: GET /api/commands
- * - Para ver comandos por estado: GET /api/commands/status/{status}
- * - Para ver un comando específico: GET /api/commands/{id}
+ * - To view commands: GET /api/commands
+ * - To view commands by status: GET /api/commands/status/{status}
+ * - To view specific command: GET /api/commands/{id}
  * 
  * TODO: 
- * - Crear SalaController para gestionar las salas y listar PCs por sala
- * - Eliminar ComputerController y ComputerService cuando se migre el frontend
+ * - Create SalaController to manage rooms and list PCs by room
+ * - Remove ComputerController and ComputerService when frontend is migrated
  */
 @RestController
 @RequestMapping("/computers")
 @RequiredArgsConstructor
+@Tag(name = "Computers (Deprecated)", description = "Computer management API - DEPRECATED, use Commands API instead")
 public class ComputerController {
 
     /**
-     * Endpoint de información sobre la migración a la nueva arquitectura.
+     * Migration information endpoint.
      */
+    @Operation(summary = "Migration information", description = "Provides information about migration to new room-based architecture.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Migration information retrieved")
+    })
     @GetMapping("/migration-info")
     public ResponseEntity<Map<String, String>> getMigrationInfo() {
         return ResponseEntity.ok(Map.of(

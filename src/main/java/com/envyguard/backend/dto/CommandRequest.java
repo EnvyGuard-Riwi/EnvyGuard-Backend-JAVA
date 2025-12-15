@@ -41,12 +41,21 @@ public class CommandRequest {
             Acciones disponibles:
             - SHUTDOWN: Apaga el equipo inmediatamente
             - REBOOT: Reinicia el equipo
-            - WAKE_ON_LAN: Enciende el equipo (solo si está apagado)
+            - WAKE_ON_LAN: Enciende el equipo (solo si está apagado, requiere MAC)
             - LOCK_SESSION: Bloquea la sesión del usuario
-            - BLOCK_WEBSITE: Bloquea acceso a un sitio web (requiere URL en parameters)
+            - BLOCK_WEBSITE: Bloquea acceso a un sitio web (requiere dominio en parameters)
+            - UNBLOCK_WEBSITE: Desbloquea acceso a un sitio web (requiere dominio en parameters)
+            - FORMAT: Formateo lógico / limpieza del sistema
+            - TEST: Prueba de conexión con el agente
+            - INSTALL_APP: Instala una aplicación normal (requiere nombre de paquete en parameters)
+            - INSTALL_SNAP: Instala una aplicación snap (requiere nombre de snap en parameters)
+            - DISABLE_INTERNET: Deshabilita la conexión a internet
+            - ENABLE_INTERNET: Habilita la conexión a internet
             """, 
             example = "SHUTDOWN",
-            allowableValues = {"SHUTDOWN", "REBOOT", "WAKE_ON_LAN", "LOCK_SESSION", "BLOCK_WEBSITE"})
+            allowableValues = {"SHUTDOWN", "REBOOT", "WAKE_ON_LAN", "LOCK_SESSION", "BLOCK_WEBSITE", 
+                              "UNBLOCK_WEBSITE", "FORMAT", "TEST", "INSTALL_APP", "INSTALL_SNAP",
+                              "DISABLE_INTERNET", "ENABLE_INTERNET"})
     private String action;
 
     @Schema(description = """

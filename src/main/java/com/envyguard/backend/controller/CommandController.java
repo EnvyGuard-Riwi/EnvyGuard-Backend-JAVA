@@ -27,6 +27,7 @@ import java.util.Map;
 @RequestMapping("/commands")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
+@Tag(name = "Commands", description = "Remote command management API for controlling computers in different rooms")
 public class CommandController {
 
         private final CommandService commandService;
@@ -38,39 +39,44 @@ public class CommandController {
          * @param request CommandRequest with command data
          * @return Created command with PENDING status
          */
-        @Operation(summary = "Crear y enviar comando remoto", description = """
-                        Crea un nuevo comando para ejecutar en un equipo de una sala específica.
+        @Operation(summary = "Create and send remote command", description = """
+                        Creates a new command to execute on a computer in a specific room.
 
-                        PROCESO:
-                        1. Se busca el PC en la tabla sala_{numero} por su ID
-                        2. Se obtiene automáticamente: nombre_pc, IP, MAC del PC
-                        3. Se crea el registro del comando con estado PENDING
-                        4. Se envía a RabbitMQ para que el agente C# lo ejecute
-                        5. El comando cambia a estado SENT
+                        PROCESS:
+                        1. Searches for the PC in sala_{number} table by its ID
+                        2. Automatically retrieves: computer name, IP, MAC address
+                        3. Creates command record with PENDING status
+                        4. Sends to RabbitMQ for C# agent execution
+                        5. Command status changes to SENT
 
-                        EJEMPLO DE USO:
-                        Para apagar el PC 1 de la Sala 4:
+                        EXAMPLE:
+                        To shutdown PC 1 in Room 4:
                         {
                           "sala_number": 4,
                           "pc_id": 1,
                           "action": "SHUTDOWN"
                         }
 
-                        El sistema buscará en sala_4 el registro con id=1 y obtendrá automáticamente
-                        su IP (10.0.120.2) y MAC (08:bf:b8:03:13:0f) para enviar el comando.
+                        The system will lookup sala_4 table for id=1 and automatically retrieve
+                        its IP (10.0.120.2) and MAC (08:bf:b8:03:13:0f) to send the command.
 
-                        ACCIONES DISPONIBLES:
-                        - SHUTDOWN: Apaga el equipo inmediatamente
-                        - REBOOT: Reinicia el equipo
-                        - WAKE_ON_LAN: Enciende el equipo (solo si está apagado, requiere MAC)
-                        - LOCK_SESSION: Bloquea la sesión actual del usuario
-                        - BLOCK_WEBSITE: Bloquea acceso a un sitio (requiere URL en parameters)
+                        AVAILABLE ACTIONS:
+                        - SHUTDOWN: Shutdown computer immediately
+                        - REBOOT: Restart computer
+                        - WAKE_ON_LAN: Wake up computer (requires MAC address)
+                        - LOCK_SESSION: Lock current user session
+                        - BLOCK_WEBSITE: Block website access (requires URL in parameters)
+                        - UNBLOCK_WEBSITE: Unblock website access
+                        - FORMAT: Logical format/cleanup
+                        - TEST: Test connection
+                        - INSTALL_APP: Install application
+                        - INSTALL_SNAP: Install snap package
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando creado y enviado exitosamente a RabbitMQ", content = @Content(schema = @Schema(implementation = Command.class))),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos (sala o pc_id no válidos)"),
-                        @ApiResponse(responseCode = "401", description = "Usuario no autenticado"),
-                        @ApiResponse(responseCode = "404", description = "PC no encontrado en la sala especificada")
+                        @ApiResponse(responseCode = "202", description = "Command created and sent successfully to RabbitMQ", content = @Content(schema = @Schema(implementation = Command.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid data (invalid room or pc_id)"),
+                        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+                        @ApiResponse(responseCode = "404", description = "PC not found in specified room")
         })
         @PostMapping
         public ResponseEntity<Command> createCommand(@Valid @RequestBody CommandRequest request) {
@@ -82,81 +88,167 @@ public class CommandController {
         // ENDPOINTS DE PRUEBA (TEST ENDPOINTS)
         // ==========================================
 
-        @Operation(summary = "Prueba: Apagar equipo (SHUTDOWN)", description = "Endpoint específico para probar el comando de apagado.")
+        @Operation(summary = "Shutdown computer", description = "Sends SHUTDOWN command to turn off the target computer immediately.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando de apagado enviado"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                        @ApiResponse(responseCode = "202", description = "Shutdown command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/shutdown")
         public ResponseEntity<Command> testShutdown(
-                        @Parameter(description = "Número de sala (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "ID del PC", example = "1") @RequestParam Long pcId) {
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
 
                 CommandRequest request = new CommandRequest(salaNumber, pcId, "SHUTDOWN", null);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Prueba: Reiniciar equipo (REBOOT)", description = "Endpoint específico para probar el comando de reinicio.")
+        @Operation(summary = "Reboot computer", description = "Sends REBOOT command to restart the target computer.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando de reinicio enviado"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                        @ApiResponse(responseCode = "202", description = "Reboot command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/reboot")
         public ResponseEntity<Command> testReboot(
-                        @Parameter(description = "Número de sala (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "ID del PC", example = "1") @RequestParam Long pcId) {
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
 
                 CommandRequest request = new CommandRequest(salaNumber, pcId, "REBOOT", null);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Prueba: Encender equipo (WAKE_ON_LAN)", description = "Endpoint específico para probar el comando de encendido vía Wake-on-LAN.")
+        @Operation(summary = "Wake on LAN", description = "Sends Wake-on-LAN magic packet to turn on a powered-off computer using its MAC address.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando WoL enviado"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                        @ApiResponse(responseCode = "202", description = "Wake-on-LAN command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/wake-on-lan")
         public ResponseEntity<Command> testWakeOnLan(
-                        @Parameter(description = "Número de sala (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "ID del PC", example = "1") @RequestParam Long pcId) {
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
 
                 CommandRequest request = new CommandRequest(salaNumber, pcId, "WAKE_ON_LAN", null);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Prueba: Bloquear sesión (LOCK_SESSION)", description = "Endpoint específico para probar el comando de bloqueo de sesión de usuario.")
+        @Operation(summary = "Lock user session", description = "Locks the current user session on the target computer.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando de bloqueo enviado"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                        @ApiResponse(responseCode = "202", description = "Lock session command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/lock-session")
         public ResponseEntity<Command> testLockSession(
-                        @Parameter(description = "Número de sala (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "ID del PC", example = "1") @RequestParam Long pcId) {
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
 
                 CommandRequest request = new CommandRequest(salaNumber, pcId, "LOCK_SESSION", null);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Prueba: Bloquear sitio web (BLOCK_WEBSITE)", description = "Endpoint específico para probar el comando de bloqueo de sitio web.")
+        @Operation(summary = "Block website", description = "Blocks access to a specific website on the target computer by adding it to the hosts file.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Comando de bloqueo web enviado"),
-                        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                        @ApiResponse(responseCode = "202", description = "Block website command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/block-website")
         public ResponseEntity<Command> testBlockWebsite(
-                        @Parameter(description = "Número de sala (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "ID del PC", example = "1") @RequestParam Long pcId,
-                        @Parameter(description = "URL del sitio a bloquear", example = "facebook.com") @RequestParam String url) {
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
+                        @Parameter(description = "Website URL to block (domain only)", example = "facebook.com") @RequestParam String url) {
 
-                // Construir JSON simple para parameters
-                String parameters = String.format("{\"url\": \"%s\"}", url);
+                // El agente espera solo el dominio en parameters, no JSON
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "BLOCK_WEBSITE", url);
+                Command command = commandService.createCommand(request);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
+        }
 
-                CommandRequest request = new CommandRequest(salaNumber, pcId, "BLOCK_WEBSITE", parameters);
+        @Operation(summary = "Unblock website", description = "Removes website block by removing it from the hosts file on the target computer.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "202", description = "Unblock website command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
+        })
+        @PostMapping("/unblock-website")
+        public ResponseEntity<Command> testUnblockWebsite(
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
+                        @Parameter(description = "Website URL to unblock (domain only)", example = "facebook.com") @RequestParam String url) {
+
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "UNBLOCK_WEBSITE", url);
+                Command command = commandService.createCommand(request);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
+        }
+
+        @Operation(summary = "Logical format/cleanup", description = "Performs logical format or system cleanup on the target computer (removes temp files, cache, etc).")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "202", description = "Format command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
+        })
+        @PostMapping("/format")
+        public ResponseEntity<Command> testFormat(
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
+
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "FORMAT", null);
+                Command command = commandService.createCommand(request);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
+        }
+
+        @Operation(summary = "Test connection", description = "Tests connectivity with the agent running on the target computer.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "202", description = "Test command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
+        })
+        @PostMapping("/test")
+        public ResponseEntity<Command> testConnection(
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
+
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "TEST", null);
+                Command command = commandService.createCommand(request);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
+        }
+
+        @Operation(summary = "Install application", description = "Installs a standard application package on the target computer using system package manager.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "202", description = "Install application command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
+        })
+        @PostMapping("/install-app")
+        public ResponseEntity<Command> testInstallApp(
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
+                        @Parameter(description = "Package name to install", example = "git") @RequestParam String packageName) {
+
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "INSTALL_APP", packageName);
+                Command command = commandService.createCommand(request);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
+        }
+
+        @Operation(summary = "Install snap package", description = "Installs a snap package on the target computer using snap package manager.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "202", description = "Install snap command sent successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "404", description = "PC not found")
+        })
+        @PostMapping("/install-snap")
+        public ResponseEntity<Command> testInstallSnap(
+                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
+                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
+                        @Parameter(description = "Snap package name to install", example = "rider") @RequestParam String snapName) {
+
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "INSTALL_SNAP", snapName);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
@@ -168,21 +260,21 @@ public class CommandController {
          * @param computerName Computer name
          * @return List of commands
          */
-        @Operation(summary = "Obtener historial de comandos de un PC", description = """
-                        Obtiene todos los comandos ejecutados en un equipo específico por su nombre.
-                        Útil para ver el historial completo de acciones realizadas en un PC.
+        @Operation(summary = "Get command history by computer", description = """
+                        Retrieves all commands executed on a specific computer by its name.
+                        Useful for viewing complete action history on a PC.
 
-                        EJEMPLO: GET /api/commands/computer/PC 1
+                        EXAMPLE: GET /api/commands/computer/PC 1
 
-                        Retorna todos los comandos (pendientes, ejecutados, fallidos) de ese PC.
+                        Returns all commands (pending, executed, failed) for that PC.
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Lista de comandos obtenida exitosamente"),
-                        @ApiResponse(responseCode = "401", description = "No autenticado")
+                        @ApiResponse(responseCode = "200", description = "Command list retrieved successfully"),
+                        @ApiResponse(responseCode = "401", description = "Not authenticated")
         })
         @GetMapping("/computer/{computerName}")
         public ResponseEntity<List<Command>> getCommandsByComputer(
-                        @Parameter(description = "Nombre del PC (ej: 'PC 1', 'PC 2')", example = "PC 1") @PathVariable String computerName) {
+                        @Parameter(description = "Computer name (e.g., 'PC 1', 'PC 2')", example = "PC 1") @PathVariable String computerName) {
                 List<Command> commands = commandService.getCommandsByComputer(computerName);
                 return ResponseEntity.ok(commands);
         }
@@ -194,24 +286,24 @@ public class CommandController {
          * @param id Command ID
          * @return Found command
          */
-        @Operation(summary = "Obtener detalles de un comando", description = """
-                        Obtiene los detalles completos de un comando específico por su ID.
-                        Incluye información sobre:
-                        - Sala y PC objetivo
-                        - Acción ejecutada
-                        - Estado actual (PENDING, SENT, EXECUTED, FAILED)
-                        - Tiempos de creación, envío y ejecución
-                        - Mensaje de resultado del agente
-                        - Usuario que lo ejecutó
+        @Operation(summary = "Get command details by ID", description = """
+                        Retrieves complete details of a specific command by its ID.
+                        Includes information about:
+                        - Target room and PC
+                        - Executed action
+                        - Current status (PENDING, SENT, EXECUTED, FAILED)
+                        - Creation, send, and execution timestamps
+                        - Agent result message
+                        - User who executed it
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Comando encontrado con todos sus detalles", content = @Content(schema = @Schema(implementation = Command.class))),
-                        @ApiResponse(responseCode = "401", description = "No autenticado"),
-                        @ApiResponse(responseCode = "404", description = "Comando no encontrado")
+                        @ApiResponse(responseCode = "200", description = "Command found with all details", content = @Content(schema = @Schema(implementation = Command.class))),
+                        @ApiResponse(responseCode = "401", description = "Not authenticated"),
+                        @ApiResponse(responseCode = "404", description = "Command not found")
         })
         @GetMapping("/{id}")
         public ResponseEntity<Command> getCommandById(
-                        @Parameter(description = "ID del comando", example = "1") @PathVariable Long id) {
+                        @Parameter(description = "Command ID", example = "1") @PathVariable Long id) {
                 Command command = commandService.getCommandById(id);
                 return ResponseEntity.ok(command);
         }
@@ -222,30 +314,30 @@ public class CommandController {
          *
          * @return List of all commands
          */
-        @Operation(summary = "Obtener todos los comandos", description = """
-                        Obtiene la lista completa de todos los comandos registrados en el sistema, sin filtros.
+        @Operation(summary = "Get all commands", description = """
+                        Retrieves complete list of all commands registered in the system without filters.
 
-                        **Información retornada para cada comando:**
-                        - ID del comando
-                        - Sala y PC de destino (salaNumber, pcId, computerName, targetIp, macAddress)
-                        - Acción ejecutada (SHUTDOWN, REBOOT, WAKE_ON_LAN, LOCK_SESSION, BLOCK_WEBSITE)
-                        - Parámetros JSON opcionales
-                        - Estado actual (PENDING, SENT, EXECUTED, FAILED)
-                        - Timestamp de envío (sentAt) y ejecución (executedAt)
-                        - Mensaje de resultado desde el agente C#
-                        - Email del usuario que creó el comando
-                        - Timestamp de creación
+                        **Information returned for each command:**
+                        - Command ID
+                        - Target room and PC (salaNumber, pcId, computerName, targetIp, macAddress)
+                        - Executed action (SHUTDOWN, REBOOT, WAKE_ON_LAN, LOCK_SESSION, BLOCK_WEBSITE, etc.)
+                        - Optional JSON parameters
+                        - Current status (PENDING, SENT, EXECUTED, FAILED)
+                        - Send (sentAt) and execution (executedAt) timestamps
+                        - Result message from C# agent
+                        - Email of user who created the command
+                        - Creation timestamp
 
-                        **Útil para:**
-                        - Panel de administración que muestra histórico completo
-                        - Auditoría de todas las acciones realizadas
-                        - Análisis y estadísticas de uso del sistema
+                        **Useful for:**
+                        - Admin panel showing complete history
+                        - Audit of all performed actions
+                        - System usage analysis and statistics
 
-                        **Nota:** La lista puede ser extensa. Considera usar filtros por estado si solo necesitas comandos específicos.
+                        **Note:** List can be extensive. Consider using status filters if you only need specific commands.
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Lista de comandos obtenida exitosamente"),
-                        @ApiResponse(responseCode = "401", description = "No autenticado - Token JWT inválido o ausente")
+                        @ApiResponse(responseCode = "200", description = "Command list retrieved successfully"),
+                        @ApiResponse(responseCode = "401", description = "Not authenticated - Invalid or missing JWT token")
         })
         @GetMapping
         public ResponseEntity<List<Command>> getAllCommands() {
@@ -260,37 +352,37 @@ public class CommandController {
          * @param status Command status (PENDING, SENT, EXECUTED, FAILED)
          * @return List of commands
          */
-        @Operation(summary = "Obtener comandos por estado", description = """
-                        Obtiene todos los comandos filtrados por un estado específico en el flujo de ejecución.
+        @Operation(summary = "Get commands by status", description = """
+                        Retrieves all commands filtered by a specific status in the execution flow.
 
-                        **Estados disponibles:**
-                        - **PENDING**: Comando creado pero aún no enviado a RabbitMQ (estado inicial)
-                        - **SENT**: Comando enviado a la cola RabbitMQ, esperando que el agente C# lo procese
-                        - **EXECUTED**: Comando ejecutado exitosamente por el agente C# en el PC destino
-                        - **FAILED**: Error durante el envío o ejecución del comando
+                        **Available statuses:**
+                        - **PENDING**: Command created but not yet sent to RabbitMQ (initial state)
+                        - **SENT**: Command sent to RabbitMQ queue, waiting for C# agent to process
+                        - **EXECUTED**: Command executed successfully by C# agent on target PC
+                        - **FAILED**: Error during sending or execution of command
 
-                        **Ejemplos de uso:**
-                        - `GET /api/commands/status/PENDING` - Ver comandos que aún no se enviaron
-                        - `GET /api/commands/status/SENT` - Monitorear comandos en proceso (enviados pero no ejecutados)
-                        - `GET /api/commands/status/EXECUTED` - Historial de comandos completados
-                        - `GET /api/commands/status/FAILED` - Investigar comandos fallidos para retry o debugging
+                        **Usage examples:**
+                        - `GET /api/commands/status/PENDING` - View commands not yet sent
+                        - `GET /api/commands/status/SENT` - Monitor commands in process (sent but not executed)
+                        - `GET /api/commands/status/EXECUTED` - History of completed commands
+                        - `GET /api/commands/status/FAILED` - Investigate failed commands for retry or debugging
 
-                        **Información retornada:**
-                        Misma estructura completa que GET /api/commands, pero filtrada por estado.
+                        **Returned information:**
+                        Same complete structure as GET /api/commands, but filtered by status.
 
-                        **Útil para:**
-                        - Dashboards que muestran comandos pendientes o en proceso
-                        - Sistema de notificaciones para comandos fallidos
-                        - Análisis de tasa de éxito/fallo de comandos
+                        **Useful for:**
+                        - Dashboards showing pending or in-process commands
+                        - Notification system for failed commands
+                        - Analysis of command success/failure rate
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Lista de comandos filtrada exitosamente"),
-                        @ApiResponse(responseCode = "400", description = "Estado inválido - Valores permitidos: PENDING, SENT, EXECUTED, FAILED"),
-                        @ApiResponse(responseCode = "401", description = "No autenticado - Token JWT inválido o ausente")
+                        @ApiResponse(responseCode = "200", description = "Command list filtered successfully"),
+                        @ApiResponse(responseCode = "400", description = "Invalid status - Allowed values: PENDING, SENT, EXECUTED, FAILED"),
+                        @ApiResponse(responseCode = "401", description = "Not authenticated - Invalid or missing JWT token")
         })
         @GetMapping("/status/{status}")
         public ResponseEntity<List<Command>> getCommandsByStatus(
-                        @Parameter(description = "Estado del comando", example = "EXECUTED") @PathVariable Command.CommandStatus status) {
+                        @Parameter(description = "Command status", example = "EXECUTED") @PathVariable Command.CommandStatus status) {
                 List<Command> commands = commandService.getCommandsByStatus(status);
                 return ResponseEntity.ok(commands);
         }
@@ -303,53 +395,53 @@ public class CommandController {
          * @param request Map with status and resultMessage
          * @return Updated command
          */
-        @Operation(summary = "Actualizar estado de comando", description = """
-                        Actualiza el estado de un comando específico y opcionalmente agrega un mensaje de resultado.
+        @Operation(summary = "Update command status", description = """
+                        Updates the status of a specific command and optionally adds a result message.
 
-                        **Flujo de actualización de estados:**
-                        1. **Frontend crea comando** → Estado inicial: `PENDING`
-                        2. **Backend envía a RabbitMQ** → Actualiza a: `SENT`
-                        3. **Agente C# ejecuta** → Actualiza a: `EXECUTED` (éxito) o `FAILED` (error)
+                        **Status update flow:**
+                        1. **Frontend creates command** → Initial status: `PENDING`
+                        2. **Backend sends to RabbitMQ** → Updates to: `SENT`
+                        3. **C# Agent executes** → Updates to: `EXECUTED` (success) or `FAILED` (error)
 
-                        **Estados válidos:**
-                        - `PENDING`: Comando creado pero no enviado
-                        - `SENT`: Comando en cola RabbitMQ, esperando procesamiento
-                        - `EXECUTED`: Comando completado exitosamente
-                        - `FAILED`: Error en envío o ejecución
+                        **Valid statuses:**
+                        - `PENDING`: Command created but not sent
+                        - `SENT`: Command in RabbitMQ queue, waiting for processing
+                        - `EXECUTED`: Command completed successfully
+                        - `FAILED`: Error in sending or execution
 
                         **Request Body (JSON):**
                         ```json
                         {
                           "status": "EXECUTED",
-                          "resultMessage": "PC apagado correctamente a las 14:30"
+                          "resultMessage": "PC shutdown successfully at 14:30"
                         }
                         ```
 
-                        **Campos:**
-                        - `status` (requerido): Nuevo estado del comando
-                        - `resultMessage` (opcional): Mensaje descriptivo del resultado (éxito/error)
+                        **Fields:**
+                        - `status` (required): New command status
+                        - `resultMessage` (optional): Descriptive result message (success/error)
 
-                        **Usuarios principales:**
-                        - **Agente C# en Windows**: Reporta resultado de ejecución con mensaje detallado
-                        - **Backend (interno)**: Actualiza a SENT cuando envía el comando a RabbitMQ
-                        - **Administrador (manual)**: Puede corregir estados manualmente si es necesario
+                        **Main users:**
+                        - **C# Agent on Windows**: Reports execution result with detailed message
+                        - **Backend (internal)**: Updates to SENT when sending command to RabbitMQ
+                        - **Administrator (manual)**: Can manually correct statuses if necessary
 
-                        **Ejemplos de resultMessage:**
-                        - Éxito: "Equipo apagado en 10 segundos", "WakeOnLAN enviado exitosamente"
-                        - Error: "PC no responde al comando", "Privilegios insuficientes para ejecutar"
+                        **Example resultMessage:**
+                        - Success: "Computer shutdown in 10 seconds", "WakeOnLAN sent successfully"
+                        - Error: "PC does not respond to command", "Insufficient privileges to execute"
 
-                        **Response:** Retorna el comando completo actualizado con timestamp de ejecución.
+                        **Response:** Returns complete updated command with execution timestamp.
                         """)
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Estado actualizado exitosamente - Retorna comando completo", content = @Content(schema = @Schema(implementation = Command.class))),
-                        @ApiResponse(responseCode = "400", description = "Estado inválido o formato JSON incorrecto - Valores permitidos: PENDING, SENT, EXECUTED, FAILED"),
-                        @ApiResponse(responseCode = "401", description = "No autenticado - Token JWT inválido o ausente"),
-                        @ApiResponse(responseCode = "404", description = "Comando no encontrado - ID inválido")
+                        @ApiResponse(responseCode = "200", description = "Status updated successfully - Returns complete command", content = @Content(schema = @Schema(implementation = Command.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid status or incorrect JSON format - Allowed values: PENDING, SENT, EXECUTED, FAILED"),
+                        @ApiResponse(responseCode = "401", description = "Not authenticated - Invalid or missing JWT token"),
+                        @ApiResponse(responseCode = "404", description = "Command not found - Invalid ID")
         })
         @PutMapping("/{id}/status")
         public ResponseEntity<Command> updateCommandStatus(
-                        @Parameter(description = "ID del comando a actualizar", example = "1") @PathVariable Long id,
-                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Nuevo estado y mensaje de resultado (opcional)", content = @Content(schema = @Schema(example = "{\"status\": \"EXECUTED\", \"resultMessage\": \"Comando ejecutado correctamente en PC 1 de Sala 4\"}"))) @RequestBody Map<String, String> request) {
+                        @Parameter(description = "Command ID to update", example = "1") @PathVariable Long id,
+                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "New status and result message (optional)", content = @Content(schema = @Schema(example = "{\"status\": \"EXECUTED\", \"resultMessage\": \"Command executed successfully on PC 1 in Room 4\"}"))) @RequestBody Map<String, String> request) {
                 String statusStr = request.get("status");
                 if (statusStr == null || statusStr.trim().isEmpty()) {
                         throw new IllegalArgumentException("Status is required and cannot be empty");

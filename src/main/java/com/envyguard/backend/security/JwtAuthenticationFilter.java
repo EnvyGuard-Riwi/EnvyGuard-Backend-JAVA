@@ -59,7 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if (jwtService.validateToken(jwt, userDetails)) {
+                // CRITICAL: Check if user is enabled before authenticating
+                if (jwtService.validateToken(jwt, userDetails) && userDetails.isEnabled()) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -67,6 +68,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else if (!userDetails.isEnabled()) {
+                    log.debug("User account is disabled: {}", userEmail);
                 }
             } catch (JwtException | IllegalArgumentException e) {
                 log.debug("JWT validation failed: {}", e.getMessage());
