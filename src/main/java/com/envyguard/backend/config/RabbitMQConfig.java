@@ -23,6 +23,7 @@ public class RabbitMQConfig {
 
     public static final String PC_COMMANDS_QUEUE = "pc_commands";
     public static final String PC_RESPONSES_QUEUE = "pc_responses";
+    public static final String PC_STATUS_UPDATES_QUEUE = "pc_status_updates";
 
     /**
      * Defines the queue for commands sent to C# agents.
@@ -42,6 +43,16 @@ public class RabbitMQConfig {
     @Bean
     public Queue pcResponsesQueue() {
         return new Queue(PC_RESPONSES_QUEUE, true);
+    }
+
+    /**
+     * Defines the queue for PC status updates.
+     *
+     * @return Configured queue
+     */
+    @Bean
+    public Queue pcStatusUpdatesQueue() {
+        return new Queue(PC_STATUS_UPDATES_QUEUE, true);
     }
 
     /**
@@ -81,6 +92,7 @@ public class RabbitMQConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jsonMessageConverter());
+        factory.setMissingQueuesFatal(false);
         return factory;
     }
 }
