@@ -75,7 +75,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/computers", "/computers/**");
+                .requestMatchers("/computers", "/computers/**", "/public", "/public/**");
     }
 
     @Bean
@@ -89,6 +89,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/ws-spy/**").permitAll()
                         .requestMatchers("/computers", "/computers/**").permitAll()
+                        .requestMatchers("/public", "/public/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
