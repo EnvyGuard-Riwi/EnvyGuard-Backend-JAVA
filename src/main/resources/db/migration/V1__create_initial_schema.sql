@@ -100,3 +100,113 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
 CREATE INDEX IF NOT EXISTS idx_incidents_severity ON incidents(severity);
 CREATE INDEX IF NOT EXISTS idx_incidents_created_at ON incidents(created_at);
+
+-- Create blocked_websites table
+CREATE TABLE IF NOT EXISTS blocked_websites (
+    id BigSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    url VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+-- Create installable_apps table
+CREATE TABLE IF NOT EXISTS installable_apps (
+    id BigSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    command VARCHAR(1000) NOT NULL,
+    description VARCHAR(1000),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+-- Initial population of installable_apps
+INSERT INTO installable_apps (name, command, description) VALUES
+-- SNAP Packages
+('code', 'snap install code --classic', 'Visual Studio Code'),
+('slack', 'snap install slack', 'Slack (mensajería)'),
+('discord', 'snap install discord', 'Discord'),
+('postman', 'snap install postman', 'Postman (API testing)'),
+('spotify', 'snap install spotify', 'Spotify'),
+('vlc', 'snap install vlc', 'VLC Media Player'),
+('gimp', 'snap install gimp', 'GIMP (editor de imágenes)'),
+('inkscape', 'snap install inkscape', 'Inkscape (diseño vectorial)'),
+('blender', 'snap install blender --classic', 'Blender (3D)'),
+('obs-studio', 'snap install obs-studio', 'OBS Studio (streaming)'),
+('zoom-client', 'snap install zoom-client', 'Zoom'),
+('telegram-desktop', 'snap install telegram-desktop', 'Telegram'),
+('chromium', 'snap install chromium', 'Chromium Browser'),
+('firefox', 'snap install firefox', 'Firefox'),
+('brave', 'snap install brave', 'Brave Browser'),
+('intellij-idea-community', 'snap install intellij-idea-community --classic', 'IntelliJ IDEA'),
+('pycharm-community', 'snap install pycharm-community --classic', 'PyCharm'),
+('rider', 'snap install rider --classic', 'JetBrains Rider'),
+('webstorm', 'snap install webstorm --classic', 'WebStorm'),
+('phpstorm', 'snap install phpstorm --classic', 'PHPStorm'),
+('datagrip', 'snap install datagrip --classic', 'DataGrip (DB)'),
+('dbeaver-ce', 'snap install dbeaver-ce', 'DBeaver (DB)'),
+('insomnia', 'snap install insomnia', 'Insomnia (API)'),
+('figma-linux', 'snap install figma-linux', 'Figma'),
+('notion-snap', 'snap install notion-snap', 'Notion'),
+('drawio', 'snap install drawio', 'Draw.io (diagramas)'),
+
+-- APT Packages
+('git', 'apt-get install -y git', 'Git'),
+('docker.io', 'apt-get install -y docker.io', 'Docker'),
+('nodejs', 'apt-get install -y nodejs', 'Node.js'),
+('npm', 'apt-get install -y npm', 'NPM'),
+('python3', 'apt-get install -y python3', 'Python 3'),
+('python3-pip', 'apt-get install -y python3-pip', 'PIP (Python)'),
+('openjdk-17-jdk', 'apt-get install -y openjdk-17-jdk', 'Java 17'),
+('openjdk-11-jdk', 'apt-get install -y openjdk-11-jdk', 'Java 11'),
+('maven', 'apt-get install -y maven', 'Maven'),
+('gradle', 'apt-get install -y gradle', 'Gradle'),
+('mysql-server', 'apt-get install -y mysql-server', 'MySQL Server'),
+('postgresql', 'apt-get install -y postgresql', 'PostgreSQL'),
+('mongodb', 'apt-get install -y mongodb', 'MongoDB'),
+('redis-server', 'apt-get install -y redis-server', 'Redis'),
+('nginx', 'apt-get install -y nginx', 'Nginx'),
+('apache2', 'apt-get install -y apache2', 'Apache'),
+('curl', 'apt-get install -y curl', 'cURL'),
+('wget', 'apt-get install -y wget', 'Wget'),
+('vim', 'apt-get install -y vim', 'Vim'),
+('nano', 'apt-get install -y nano', 'Nano'),
+('htop', 'apt-get install -y htop', 'htop (monitor)'),
+('neofetch', 'apt-get install -y neofetch', 'Neofetch'),
+('build-essential', 'apt-get install -y build-essential', 'Compiladores C/C++'),
+('gcc', 'apt-get install -y gcc', 'GCC'),
+('g++', 'apt-get install -y g++', 'G++'),
+('make', 'apt-get install -y make', 'Make'),
+('cmake', 'apt-get install -y cmake', 'CMake'),
+('php', 'apt-get install -y php', 'PHP'),
+('composer', 'apt-get install -y composer', 'Composer (PHP)'),
+('ruby', 'apt-get install -y ruby', 'Ruby'),
+('golang-go', 'apt-get install -y golang-go', 'Go'),
+('rust', 'apt-get install -y rustc', 'Rust'),
+('dotnet-sdk-8.0', 'apt-get install -y dotnet-sdk-8.0', '.NET SDK 8'),
+('filezilla', 'apt-get install -y filezilla', 'FileZilla (FTP)'),
+('wireshark', 'apt-get install -y wireshark', 'Wireshark'),
+('nmap', 'apt-get install -y nmap', 'Nmap'),
+('net-tools', 'apt-get install -y net-tools', 'Net Tools'),
+('openssh-server', 'apt-get install -y openssh-server', 'SSH Server'),
+('tree', 'apt-get install -y tree', 'Tree'),
+('unzip', 'apt-get install -y unzip', 'Unzip'),
+('zip', 'apt-get install -y zip', 'Zip')
+ON CONFLICT (command) DO NOTHING;
+
+-- Create computers table for monitoring overlay
+CREATE TABLE IF NOT EXISTS computers (
+    id BigSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    ip_address VARCHAR(50),
+    mac_address VARCHAR(50),
+    status VARCHAR(50) NOT NULL DEFAULT 'OFFLINE',
+    last_seen TIMESTAMP,
+    lab_name VARCHAR(100),
+    room_number INTEGER,
+    position_in_room VARCHAR(50),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE
+);
+
+
+
+

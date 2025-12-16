@@ -18,7 +18,7 @@ import java.util.List;
  * Controller for managing incidents.
  */
 @RestController
-@RequestMapping("/api/incidents")
+@RequestMapping("/incidents")
 @RequiredArgsConstructor
 @Tag(name = "Incidents", description = "Management of Incidents/News")
 public class IncidentController {

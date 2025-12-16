@@ -9,5 +9,8 @@ import java.util.Optional;
 @Repository
 public interface ComputerRepository extends JpaRepository<Computer, Long> {
     Optional<Computer> findByName(String name);
+
     boolean existsByName(String name);
+
+    Optional<Computer> findByIpAddress(String ipAddress);
 }

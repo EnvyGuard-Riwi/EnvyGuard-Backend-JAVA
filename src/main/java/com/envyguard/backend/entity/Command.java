@@ -42,7 +42,7 @@ public class Command {
     private String macAddress;
 
     @Column(name = "action", nullable = false)
-    @Schema(description = "Acción a ejecutar", example = "SHUTDOWN")
+    @Schema(description = "Acción a ejecutar")
     private String action;
 
     @Column(columnDefinition = "TEXT")

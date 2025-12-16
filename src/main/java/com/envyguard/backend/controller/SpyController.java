@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * Sends START/STOP commands to monitoring agents.
  */
 @RestController
-@RequestMapping("/api/control")
+@RequestMapping("/control")
 @CrossOrigin(origins = "*")
 @ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Exam Control", description = "Exam monitoring control API")
@@ -26,13 +26,12 @@ public class SpyController {
 
     @Operation(summary = "Control exam monitoring", description = "Sends START or STOP command to all monitoring agents via RabbitMQ fanout exchange.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Control command sent successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid action (use START or STOP)")
+            @ApiResponse(responseCode = "200", description = "Control command sent successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid action (use START or STOP)")
     })
     @PostMapping("/{action}")
     public String controlExam(
-            @Parameter(description = "Control action (START or STOP)", example = "START") 
-            @PathVariable String action) {
+            @Parameter(description = "Control action (START or STOP)", example = "START") @PathVariable String action) {
         // Send message to all agents (Fanout exchange)
         // exchange: "spy.control", routingKey: "" (fanout ignores it)
         amqpTemplate.convertAndSend("spy.control", "", action.toUpperCase());

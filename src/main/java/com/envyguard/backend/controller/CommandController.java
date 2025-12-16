@@ -31,6 +31,7 @@ import java.util.Map;
 public class CommandController {
 
         private final CommandService commandService;
+        private final com.envyguard.backend.service.InstallableAppService installableAppService;
 
         /**
          * Creates a new command for a computer.
@@ -68,8 +69,7 @@ public class CommandController {
                         - BLOCK_WEBSITE: Block website access (requires URL in parameters)
                         - UNBLOCK_WEBSITE: Unblock website access
                         - FORMAT: Logical format/cleanup
-                        - TEST: Test connection
-                        - INSTALL_APP: Install application
+                        - INSTALL_APP: Install application (resolves command from DB)
                         - INSTALL_SNAP: Install snap package
                         """)
         @ApiResponses(value = {
@@ -80,6 +80,18 @@ public class CommandController {
         })
         @PostMapping
         public ResponseEntity<Command> createCommand(@Valid @RequestBody CommandRequest request) {
+                // If action is INSTALL_APP, resolve the real command from DB if possible and if
+                // parameter is a keyword
+                if ("INSTALL_APP".equals(request.getAction()) && request.getParameters() != null) {
+                        try {
+                                String realCommand = installableAppService.getCommandForApp(request.getParameters());
+                                request.setParameters(realCommand);
+                        } catch (Exception e) {
+                                // If not found in DB, keep as is (fallback) or log warning
+                                // For now we assume the frontend sends the keyword
+                        }
+                }
+
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
@@ -152,41 +164,6 @@ public class CommandController {
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Block website", description = "Blocks access to a specific website on the target computer by adding it to the hosts file.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Block website command sent successfully"),
-                        @ApiResponse(responseCode = "400", description = "Invalid data"),
-                        @ApiResponse(responseCode = "404", description = "PC not found")
-        })
-        @PostMapping("/block-website")
-        public ResponseEntity<Command> testBlockWebsite(
-                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
-                        @Parameter(description = "Website URL to block (domain only)", example = "facebook.com") @RequestParam String url) {
-
-                // El agente espera solo el dominio en parameters, no JSON
-                CommandRequest request = new CommandRequest(salaNumber, pcId, "BLOCK_WEBSITE", url);
-                Command command = commandService.createCommand(request);
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
-        }
-
-        @Operation(summary = "Unblock website", description = "Removes website block by removing it from the hosts file on the target computer.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Unblock website command sent successfully"),
-                        @ApiResponse(responseCode = "400", description = "Invalid data"),
-                        @ApiResponse(responseCode = "404", description = "PC not found")
-        })
-        @PostMapping("/unblock-website")
-        public ResponseEntity<Command> testUnblockWebsite(
-                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
-                        @Parameter(description = "Website URL to unblock (domain only)", example = "facebook.com") @RequestParam String url) {
-
-                CommandRequest request = new CommandRequest(salaNumber, pcId, "UNBLOCK_WEBSITE", url);
-                Command command = commandService.createCommand(request);
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
-        }
-
         @Operation(summary = "Logical format/cleanup", description = "Performs logical format or system cleanup on the target computer (removes temp files, cache, etc).")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "202", description = "Format command sent successfully"),
@@ -203,35 +180,20 @@ public class CommandController {
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
 
-        @Operation(summary = "Test connection", description = "Tests connectivity with the agent running on the target computer.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "202", description = "Test command sent successfully"),
-                        @ApiResponse(responseCode = "400", description = "Invalid data"),
-                        @ApiResponse(responseCode = "404", description = "PC not found")
-        })
-        @PostMapping("/test")
-        public ResponseEntity<Command> testConnection(
-                        @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
-                        @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId) {
-
-                CommandRequest request = new CommandRequest(salaNumber, pcId, "TEST", null);
-                Command command = commandService.createCommand(request);
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
-        }
-
-        @Operation(summary = "Install application", description = "Installs a standard application package on the target computer using system package manager.")
+        @Operation(summary = "Install application", description = "Installs a pre-defined application on the target computer. The packageName should match an entry in the database (e.g. 'Docker', 'Git').")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "202", description = "Install application command sent successfully"),
-                        @ApiResponse(responseCode = "400", description = "Invalid data"),
+                        @ApiResponse(responseCode = "400", description = "Invalid data or App not found"),
                         @ApiResponse(responseCode = "404", description = "PC not found")
         })
         @PostMapping("/install-app")
         public ResponseEntity<Command> testInstallApp(
                         @Parameter(description = "Room number (1-4)", example = "4") @RequestParam Integer salaNumber,
                         @Parameter(description = "PC ID", example = "1") @RequestParam Long pcId,
-                        @Parameter(description = "Package name to install", example = "git") @RequestParam String packageName) {
+                        @Parameter(description = "App name (e.g., 'Docker', 'Git')", example = "Git") @RequestParam String appName) {
 
-                CommandRequest request = new CommandRequest(salaNumber, pcId, "INSTALL_APP", packageName);
+                String realCommand = installableAppService.getCommandForApp(appName);
+                CommandRequest request = new CommandRequest(salaNumber, pcId, "INSTALL_APP", realCommand);
                 Command command = commandService.createCommand(request);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(command);
         }
