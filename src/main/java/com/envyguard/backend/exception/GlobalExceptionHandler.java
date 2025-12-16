@@ -2,6 +2,7 @@ package com.envyguard.backend.exception;
 
 import com.envyguard.backend.dto.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,7 @@ import java.util.Map;
 /**
  * Global exception handler for consistent error responses.
  */
+@Slf4j
 @RestControllerAdvice(basePackages = "com.envyguard.backend.controller")
 public class GlobalExceptionHandler {
 
@@ -84,14 +86,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex, WebRequest request) {
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+
+        // Include the actual error message for debugging
+        String errorDetail = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+        String causeDetail = ex.getCause() != null ? " | Causa: " + ex.getCause().getMessage() : "";
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error("Internal Server Error")
-                .message("An unexpected error occurred")
+                .message(errorDetail + causeDetail)
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-

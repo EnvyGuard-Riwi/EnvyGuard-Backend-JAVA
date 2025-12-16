@@ -2,8 +2,15 @@ package com.envyguard.backend;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Manual integration test for RabbitMQ connection.
+ * This test is disabled by default as it requires external RabbitMQ server.
+ * Run manually when needed to verify RabbitMQ connectivity.
+ */
+@Disabled("Manual integration test - run only when needed")
 public class RabbitMQManualTest {
 
     @Test
@@ -11,8 +18,8 @@ public class RabbitMQManualTest {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("rabbitmq.envy.crudzaso.com");
         factory.setPort(5672);
-        factory.setUsername("v9q14Pg15x");
-        factory.setPassword("Ki4Z77IRipVLG9Y1LahdxN2twlLUZ0");
+        factory.setUsername(System.getenv("RABBITMQ_USERNAME"));
+        factory.setPassword(System.getenv("RABBITMQ_PASSWORD"));
         factory.setVirtualHost("/");
 
         try (Connection connection = factory.newConnection()) {
