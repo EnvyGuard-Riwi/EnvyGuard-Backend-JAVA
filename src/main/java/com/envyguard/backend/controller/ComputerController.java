@@ -15,24 +15,24 @@ import java.util.Map;
 
 /**
  * REST controller for computer monitoring.
- * Provides endpoints for the Radar/Dashboard to discover and list computers
- * status.
+ * 
+ * @deprecated Use {@link PublicTestController} at /api/public/computers
+ *             instead.
+ *             This controller has security configuration issues in production.
  */
+@Deprecated
 @RestController
 @RequestMapping("/computers")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Global CORS for this controller
-@Tag(name = "Computers Status", description = "Real-time status monitoring API")
+@CrossOrigin(origins = "*")
+@Tag(name = "Computers Status (Deprecated)", description = "DEPRECATED - Use /api/public/computers instead")
 public class ComputerController {
 
     private final ComputerRepository computerRepository;
 
-    @Operation(summary = "List all monitored computers", description = "Returns a list of computers with their current status (ONLINE/OFFLINE). Used by the Radar.")
+    @Operation(summary = "List all monitored computers (DEPRECATED)", description = "DEPRECATED: Use GET /api/public/computers instead. This endpoint may return 403 due to security configuration issues.")
     @GetMapping
     public List<Computer> getAllComputers() {
         return computerRepository.findAll();
     }
-
-    // Keep migration info if needed, or remove. I'll remove it to clean up as they
-    // seem to move past it.
 }

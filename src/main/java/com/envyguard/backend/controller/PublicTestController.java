@@ -2,6 +2,10 @@ package com.envyguard.backend.controller;
 
 import com.envyguard.backend.entity.Computer;
 import com.envyguard.backend.repository.ComputerRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,12 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Public test endpoint to verify security is not blocking.
- * This endpoint should be accessible without authentication.
+ * Public endpoints that don't require authentication.
+ * Used for testing and public access to computer status.
  */
 @RestController
 @RequestMapping("/public")
 @RequiredArgsConstructor
+@Tag(name = "Public Endpoints", description = "Public API endpoints - no authentication required")
 public class PublicTestController {
 
     private final ComputerRepository computerRepository;
@@ -40,10 +45,15 @@ public class PublicTestController {
     }
 
     /**
-     * Real computers endpoint from database - bypasses ComputerController
+     * List all monitored computers with their current status.
+     * This is the main endpoint for the Radar/Dashboard.
      */
-    @GetMapping("/computers-real")
-    public List<Computer> computersReal() {
+    @Operation(summary = "List all monitored computers", description = "Returns a list of computers with their current status (ONLINE/OFFLINE). Used by the Radar.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of computers retrieved successfully")
+    })
+    @GetMapping("/computers")
+    public List<Computer> getAllComputers() {
         return computerRepository.findAll();
     }
 }
