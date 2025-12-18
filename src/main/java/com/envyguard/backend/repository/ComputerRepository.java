@@ -13,4 +13,8 @@ public interface ComputerRepository extends JpaRepository<Computer, Long> {
     boolean existsByName(String name);
 
     Optional<Computer> findByIpAddress(String ipAddress);
+
+    long countByStatus(Computer.ComputerStatus status);
+
+    long countByHasInternet(boolean hasInternet);
 }

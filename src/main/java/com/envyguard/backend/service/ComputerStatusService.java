@@ -49,6 +49,9 @@ public class ComputerStatusService {
                 computer.setName(statusDto.getHostname());
             }
 
+            // Update internet status
+            computer.setHasInternet(statusDto.isHasInternet());
+
             Computer saved = computerRepository.save(computer);
 
             // Broadcast to frontend

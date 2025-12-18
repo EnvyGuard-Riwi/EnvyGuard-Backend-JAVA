@@ -11,4 +11,5 @@ public class ComputerStatusDto {
     private String ipAddress;
     private String status;
     private String hostname; // Optional, in case agent sends it
+    private boolean hasInternet = true;
 }
