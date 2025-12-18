@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 /**
  * Represents a computer in the EnvyGuard system.
- * Stores information about status, identification, and configuration of each computer.
+ * Stores information about status, identification, and configuration of each
+ * computer.
  */
 @Entity
 @Table(name = "computers")
@@ -35,6 +36,10 @@ public class Computer {
     @Column(nullable = false)
     @Builder.Default
     private ComputerStatus status = ComputerStatus.OFFLINE;
+
+    @Column(name = "has_internet")
+    @Builder.Default
+    private boolean hasInternet = true;
 
     @Column(name = "last_seen")
     private LocalDateTime lastSeen;
