@@ -42,9 +42,7 @@ CREATE TABLE IF NOT EXISTS sala_4 (
     id BIGSERIAL PRIMARY KEY,
     nombre_pc VARCHAR(50) NOT NULL,
     ip VARCHAR(50),
-    mac VARCHAR(50),
-    status VARCHAR(50) DEFAULT 'OFFLINE',
-    last_seen TIMESTAMP
+    mac VARCHAR(50)
 );
 
 -- Create commands table
