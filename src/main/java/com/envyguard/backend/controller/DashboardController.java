@@ -26,6 +26,9 @@ import java.util.Map;
 @Tag(name = "Dashboard", description = "Dashboard statistics and metrics")
 public class DashboardController {
 
+    private final com.envyguard.backend.repository.Sala1Repository sala1Repository;
+    private final com.envyguard.backend.repository.Sala2Repository sala2Repository;
+    private final com.envyguard.backend.repository.Sala3Repository sala3Repository;
     private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
     private final BlockedWebsiteRepository blockedWebsiteRepository;
 
@@ -41,10 +44,14 @@ public class DashboardController {
     public ResponseEntity<Map<String, Long>> getDashboardStats() {
         Map<String, Long> stats = new HashMap<>();
 
-        // Card 1: Total Computadores
-        stats.put("totalComputers", sala4Repository.count());
+        // Card 1: Total Computadores (suma de todas las salas)
+        long totalComputers = sala1Repository.count()
+                + sala2Repository.count()
+                + sala3Repository.count()
+                + sala4Repository.count();
+        stats.put("totalComputers", totalComputers);
 
-        // Card 2: Computadores Prendidos (ONLINE)
+        // Card 2: Computadores Prendidos (ONLINE) - solo Sala 4 tiene status
         stats.put("onlineComputers", sala4Repository.countByStatus(Computer.ComputerStatus.ONLINE));
 
         // Card 3: Sitios Bloqueados
@@ -56,10 +63,14 @@ public class DashboardController {
     // Individual endpoints if the frontend prefers separate calls (matching user
     // request about generic "endpoints")
 
-    @Operation(summary = "Get total computers count")
+    @Operation(summary = "Get total computers count", description = "Returns the total count of computers across all salas (1, 2, 3, and 4)")
     @GetMapping("/stats/total-computers")
     public ResponseEntity<Long> getTotalComputers() {
-        return ResponseEntity.ok(sala4Repository.count());
+        long totalComputers = sala1Repository.count()
+                + sala2Repository.count()
+                + sala3Repository.count()
+                + sala4Repository.count();
+        return ResponseEntity.ok(totalComputers);
     }
 
     @Operation(summary = "Get online computers count")
