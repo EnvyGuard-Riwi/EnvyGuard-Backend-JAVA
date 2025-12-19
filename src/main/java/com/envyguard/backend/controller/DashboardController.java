@@ -2,7 +2,7 @@ package com.envyguard.backend.controller;
 
 import com.envyguard.backend.entity.Computer;
 import com.envyguard.backend.repository.BlockedWebsiteRepository;
-import com.envyguard.backend.repository.ComputerRepository;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,7 +26,7 @@ import java.util.Map;
 @Tag(name = "Dashboard", description = "Dashboard statistics and metrics")
 public class DashboardController {
 
-    private final ComputerRepository computerRepository;
+    private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
     private final BlockedWebsiteRepository blockedWebsiteRepository;
 
     /**
@@ -42,15 +42,12 @@ public class DashboardController {
         Map<String, Long> stats = new HashMap<>();
 
         // Card 1: Total Computadores
-        stats.put("totalComputers", computerRepository.count());
+        stats.put("totalComputers", sala4Repository.count());
 
         // Card 2: Computadores Prendidos (ONLINE)
-        stats.put("onlineComputers", computerRepository.countByStatus(Computer.ComputerStatus.ONLINE));
+        stats.put("onlineComputers", sala4Repository.countByStatus(Computer.ComputerStatus.ONLINE));
 
-        // Card 3: Computadores Sin Internet
-        stats.put("noInternetComputers", computerRepository.countByHasInternet(false));
-
-        // Card 4: Sitios Bloqueados
+        // Card 3: Sitios Bloqueados
         stats.put("blockedWebsites", blockedWebsiteRepository.count());
 
         return ResponseEntity.ok(stats);
@@ -62,19 +59,13 @@ public class DashboardController {
     @Operation(summary = "Get total computers count")
     @GetMapping("/stats/total-computers")
     public ResponseEntity<Long> getTotalComputers() {
-        return ResponseEntity.ok(computerRepository.count());
+        return ResponseEntity.ok(sala4Repository.count());
     }
 
     @Operation(summary = "Get online computers count")
     @GetMapping("/stats/online-computers")
     public ResponseEntity<Long> getOnlineComputers() {
-        return ResponseEntity.ok(computerRepository.countByStatus(Computer.ComputerStatus.ONLINE));
-    }
-
-    @Operation(summary = "Get no-internet computers count")
-    @GetMapping("/stats/no-internet-computers")
-    public ResponseEntity<Long> getNoInternetComputers() {
-        return ResponseEntity.ok(computerRepository.countByHasInternet(false));
+        return ResponseEntity.ok(sala4Repository.countByStatus(Computer.ComputerStatus.ONLINE));
     }
 
     @Operation(summary = "Get blocked websites count")

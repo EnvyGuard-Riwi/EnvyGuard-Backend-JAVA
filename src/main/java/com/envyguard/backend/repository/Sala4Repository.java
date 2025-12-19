@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 @Repository
 public interface Sala4Repository extends JpaRepository<Sala4, Long> {
-    
+
     /**
      * Find a computer by its ID in Sala 4.
      *
@@ -19,4 +19,8 @@ public interface Sala4Repository extends JpaRepository<Sala4, Long> {
      * @return Optional containing the computer if found
      */
     Optional<Sala4> findById(Long id);
+
+    Optional<Sala4> findByIp(String ip);
+
+    long countByStatus(com.envyguard.backend.entity.Computer.ComputerStatus status);
 }

@@ -37,10 +37,6 @@ public class Computer {
     @Builder.Default
     private ComputerStatus status = ComputerStatus.OFFLINE;
 
-    @Column(name = "has_internet")
-    @Builder.Default
-    private boolean hasInternet = true;
-
     @Column(name = "last_seen")
     private LocalDateTime lastSeen;
 

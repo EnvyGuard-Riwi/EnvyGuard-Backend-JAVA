@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class ComputerStatusService {
 
     private final ComputerRepository computerRepository;
+    private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
 
@@ -27,6 +28,7 @@ public class ComputerStatusService {
             log.debug("Received status update: {}", jsonMessage);
             ComputerStatusDto statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
 
+            // 1. Update general Computers table (for Dashboard status)
             Computer computer = computerRepository.findByIpAddress(statusDto.getIpAddress())
                     .orElseGet(() -> {
                         // Optional: Create new if not exists, or just log warning.
@@ -49,10 +51,27 @@ public class ComputerStatusService {
                 computer.setName(statusDto.getHostname());
             }
 
-            // Update internet status
-            computer.setHasInternet(statusDto.isHasInternet());
-
             Computer saved = computerRepository.save(computer);
+
+            // 2. Update Sala4 table (Specific request for legacy support)
+            try {
+                java.util.Optional<com.envyguard.backend.entity.Sala4> sala4Opt = sala4Repository
+                        .findByIp(statusDto.getIpAddress());
+                if (sala4Opt.isPresent()) {
+                    com.envyguard.backend.entity.Sala4 sala4 = sala4Opt.get();
+                    try {
+                        sala4.setStatus(com.envyguard.backend.entity.Computer.ComputerStatus
+                                .valueOf(statusDto.getStatus().toUpperCase()));
+                    } catch (Exception e) {
+                        sala4.setStatus(com.envyguard.backend.entity.Computer.ComputerStatus.UNKNOWN);
+                    }
+                    sala4.setLastSeen(LocalDateTime.now());
+                    sala4Repository.save(sala4);
+                    log.debug("Updated Sala4 status for IP: {}", statusDto.getIpAddress());
+                }
+            } catch (Exception e) {
+                log.warn("Could not update Sala4 status: {}", e.getMessage());
+            }
 
             // Broadcast to frontend
             messagingTemplate.convertAndSend("/topic/computers", saved);

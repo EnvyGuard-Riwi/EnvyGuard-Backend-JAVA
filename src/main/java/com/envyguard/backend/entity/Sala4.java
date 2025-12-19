@@ -35,4 +35,13 @@ public class Sala4 {
     @Column(name = "mac", length = 50)
     @Schema(description = "Dirección MAC del PC", example = "08:bf:b8:03:13:0f")
     private String mac;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'OFFLINE'")
+    @Schema(description = "Estado del PC (ONLINE/OFFLINE)", example = "ONLINE")
+    private com.envyguard.backend.entity.Computer.ComputerStatus status;
+
+    @Column(name = "last_seen")
+    @Schema(description = "Última vez que se detectó activo")
+    private java.time.LocalDateTime lastSeen;
 }
