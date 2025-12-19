@@ -22,8 +22,9 @@ public class ComputerStatusService {
     private final ObjectMapper objectMapper;
 
     @RabbitListener(queues = "pc_status_updates")
-    public void updateStatus(String jsonMessage) {
+    public void updateStatus(org.springframework.amqp.core.Message message) {
         try {
+            String jsonMessage = new String(message.getBody());
             log.debug("Received status update: {}", jsonMessage);
             ComputerStatusDto statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
 
