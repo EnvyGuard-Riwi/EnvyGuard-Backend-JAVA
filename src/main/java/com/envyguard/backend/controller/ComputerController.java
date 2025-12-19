@@ -1,7 +1,7 @@
 package com.envyguard.backend.controller;
 
 import com.envyguard.backend.entity.Computer;
-import com.envyguard.backend.repository.ComputerRepository;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -28,11 +28,22 @@ import java.util.Map;
 @Tag(name = "Computers Status (Deprecated)", description = "DEPRECATED - Use /api/public/computers instead")
 public class ComputerController {
 
-    private final ComputerRepository computerRepository;
+    private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
 
     @Operation(summary = "List all monitored computers (DEPRECATED)", description = "DEPRECATED: Use GET /api/public/computers instead. This endpoint may return 403 due to security configuration issues.")
     @GetMapping
     public List<Computer> getAllComputers() {
-        return computerRepository.findAll();
+        return sala4Repository.findAll().stream().map(sala4 -> {
+            return Computer.builder()
+                    .id(sala4.getId())
+                    .name(sala4.getNombrePc())
+                    .ipAddress(sala4.getIp())
+                    .macAddress(sala4.getMac())
+                    .status(sala4.getStatus() != null ? sala4.getStatus() : Computer.ComputerStatus.OFFLINE)
+                    .lastSeen(sala4.getLastSeen())
+                    .roomNumber(4)
+                    .labName("Sala 4")
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
     }
 }
