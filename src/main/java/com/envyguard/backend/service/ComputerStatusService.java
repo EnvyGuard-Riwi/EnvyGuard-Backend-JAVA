@@ -24,9 +24,35 @@ public class ComputerStatusService {
     @RabbitListener(queues = "pc_status_updates")
     public void updateStatus(org.springframework.amqp.core.Message message) {
         try {
+            // Validar que el mensaje no sea nulo
+            if (message == null || message.getBody() == null) {
+                log.warn("Received null message in pc_status_updates - ignoring");
+                return;
+            }
+
             String jsonMessage = new String(message.getBody());
+            
+            // Validar que el mensaje no esté vacío
+            if (jsonMessage == null || jsonMessage.trim().isEmpty()) {
+                log.warn("Received empty message in pc_status_updates - ignoring");
+                return;
+            }
+
             log.debug("Received status update: {}", jsonMessage);
-            ComputerStatusDto statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
+            
+            ComputerStatusDto statusDto;
+            try {
+                statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
+            } catch (Exception e) {
+                log.error("Failed to parse status update message: {}", e.getMessage());
+                return; // No relanzar la excepción
+            }
+
+            // Validar que el DTO tenga datos válidos
+            if (statusDto == null || statusDto.getIpAddress() == null) {
+                log.warn("Received invalid status update - missing IP address");
+                return;
+            }
 
             // Update Sala4 table (Now the primary source)
             try {
@@ -56,6 +82,7 @@ public class ComputerStatusService {
 
         } catch (Exception e) {
             log.error("Error processing status update: {}", e.getMessage(), e);
+            // NO relanzar la excepción para evitar bucles infinitos
         }
     }
 }
