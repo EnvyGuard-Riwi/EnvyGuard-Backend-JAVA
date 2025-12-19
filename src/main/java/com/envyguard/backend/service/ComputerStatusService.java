@@ -1,8 +1,7 @@
 package com.envyguard.backend.service;
 
 import com.envyguard.backend.dto.ComputerStatusDto;
-import com.envyguard.backend.entity.Computer;
-import com.envyguard.backend.repository.ComputerRepository;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class ComputerStatusService {
 
-    private final ComputerRepository computerRepository;
+    // private final ComputerRepository computerRepository; // Removed field
     private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
@@ -28,32 +27,7 @@ public class ComputerStatusService {
             log.debug("Received status update: {}", jsonMessage);
             ComputerStatusDto statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
 
-            // 1. Update general Computers table (for Dashboard status)
-            Computer computer = computerRepository.findByIpAddress(statusDto.getIpAddress())
-                    .orElseGet(() -> {
-                        // Optional: Create new if not exists, or just log warning.
-                        // For auto-discovery, we create it.
-                        Computer newComputer = new Computer();
-                        newComputer.setIpAddress(statusDto.getIpAddress());
-                        newComputer.setName(statusDto.getHostname() != null ? statusDto.getHostname()
-                                : "Unknown-" + statusDto.getIpAddress());
-                        return newComputer;
-                    });
-
-            try {
-                computer.setStatus(Computer.ComputerStatus.valueOf(statusDto.getStatus().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                computer.setStatus(Computer.ComputerStatus.UNKNOWN);
-            }
-
-            computer.setLastSeen(LocalDateTime.now());
-            if (statusDto.getHostname() != null && !statusDto.getHostname().isEmpty()) {
-                computer.setName(statusDto.getHostname());
-            }
-
-            Computer saved = computerRepository.save(computer);
-
-            // 2. Update Sala4 table (Specific request for legacy support)
+            // Update Sala4 table (Now the primary source)
             try {
                 java.util.Optional<com.envyguard.backend.entity.Sala4> sala4Opt = sala4Repository
                         .findByIp(statusDto.getIpAddress());
@@ -66,15 +40,18 @@ public class ComputerStatusService {
                         sala4.setStatus(com.envyguard.backend.entity.Computer.ComputerStatus.UNKNOWN);
                     }
                     sala4.setLastSeen(LocalDateTime.now());
-                    sala4Repository.save(sala4);
+
+                    com.envyguard.backend.entity.Sala4 savedSala4 = sala4Repository.save(sala4);
                     log.debug("Updated Sala4 status for IP: {}", statusDto.getIpAddress());
+
+                    // Broadcast to frontend (Sending Sala4 entity now)
+                    messagingTemplate.convertAndSend("/topic/computers", savedSala4);
+                } else {
+                    log.warn("Computer with IP {} not found in Sala 4", statusDto.getIpAddress());
                 }
             } catch (Exception e) {
                 log.warn("Could not update Sala4 status: {}", e.getMessage());
             }
-
-            // Broadcast to frontend
-            messagingTemplate.convertAndSend("/topic/computers", saved);
 
         } catch (Exception e) {
             log.error("Error processing status update: {}", e.getMessage(), e);

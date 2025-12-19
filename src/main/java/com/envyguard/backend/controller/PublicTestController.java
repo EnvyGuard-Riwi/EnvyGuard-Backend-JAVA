@@ -1,7 +1,5 @@
 package com.envyguard.backend.controller;
 
-import com.envyguard.backend.entity.Computer;
-import com.envyguard.backend.repository.ComputerRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,7 +22,7 @@ import java.util.Map;
 @Tag(name = "Public Endpoints", description = "Public API endpoints - no authentication required")
 public class PublicTestController {
 
-    private final ComputerRepository computerRepository;
+    private final com.envyguard.backend.repository.Sala4Repository sala4Repository;
 
     @GetMapping("/test")
     public Map<String, String> test() {
@@ -53,7 +51,7 @@ public class PublicTestController {
             @ApiResponse(responseCode = "200", description = "List of computers retrieved successfully")
     })
     @GetMapping("/computers")
-    public List<Computer> getAllComputers() {
-        return computerRepository.findAll();
+    public List<com.envyguard.backend.entity.Sala4> getAllComputers() {
+        return sala4Repository.findAll();
     }
 }
