@@ -75,7 +75,8 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/computers", "/computers/**", "/public", "/public/**");
+                // Do not ignore specific paths here to ensure CORS filter applies
+                .requestMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
     }
 
     @Bean
