@@ -91,7 +91,8 @@ public class RabbitMQConfig {
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(jsonMessageConverter());
+        // factory.setMessageConverter(jsonMessageConverter()); // Removed to avoid
+        // automatic header mapping issues
         factory.setMissingQueuesFatal(false);
         return factory;
     }
