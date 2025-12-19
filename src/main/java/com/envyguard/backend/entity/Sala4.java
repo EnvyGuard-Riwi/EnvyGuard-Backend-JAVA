@@ -37,7 +37,7 @@ public class Sala4 {
     private String mac;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'OFFLINE'")
+    @Column(name = "status", length = 50)
     @Schema(description = "Estado del PC (ONLINE/OFFLINE)", example = "ONLINE")
     private com.envyguard.backend.entity.Computer.ComputerStatus status;
 
