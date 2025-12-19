@@ -111,21 +111,6 @@ CREATE TABLE IF NOT EXISTS blocked_websites (
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
 );
 
--- Create computers table for monitoring overlay
-CREATE TABLE IF NOT EXISTS computers (
-    id BigSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    ip_address VARCHAR(50),
-    mac_address VARCHAR(50),
-    status VARCHAR(50) NOT NULL DEFAULT 'OFFLINE',
-    last_seen TIMESTAMP,
-    lab_name VARCHAR(100),
-    room_number INTEGER,
-    position_in_room VARCHAR(50),
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITHOUT TIME ZONE
-);
-
 
 
 
