@@ -14,7 +14,7 @@ INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.7', '08:bf:b8:
 
 -- FILA 1 - SECTOR B
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 1', '10.0.120.27', '08:bf:b8:03:13:73');
-INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.25', '08:bf:b8:03:13:ce');
+INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.28', '08:bf:b8:03:13:ce');
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 3', '10.0.120.24', '08:bf:b8:03:13:0a');
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.13', '08:bf:b8:03:13:a9');
 
@@ -44,7 +44,7 @@ INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.16', '08:bf:b8
 
 -- FILA 3 - SECTOR B
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 1', '10.0.120.10', '08:bf:b8:03:13:15');
-INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.', NULL);
+INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.26', NULL);
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 3', '10.0.120.18', '08:bf:b8:03:12:7e');
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.3', '08:bf:b8:03:13:fa');
 
@@ -59,6 +59,6 @@ INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.20', '08:bf:b8
 
 -- FILA 4 - SECTOR B
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 1', '10.0.120.9', NULL);
-INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.', NULL);
+INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 2', '10.0.120.8', NULL);
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 3', '10.0.120.30', '08:bf:b8:03:14:03');
 INSERT INTO sala_4 (nombre_pc, ip, mac) VALUES ('PC 4', '10.0.120.11', '08:bf:b8:03:12:59');

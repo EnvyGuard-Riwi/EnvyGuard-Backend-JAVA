@@ -91,9 +91,21 @@ public class RabbitMQConfig {
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        // factory.setMessageConverter(jsonMessageConverter()); // Removed to avoid
-        // automatic header mapping issues
+        // NO usar MessageConverter automático para evitar problemas con headers nulos
+        // factory.setMessageConverter(jsonMessageConverter()); 
         factory.setMissingQueuesFatal(false);
+        
+        // CRÍTICO: Configurar manejo de errores para evitar bucles infinitos
+        factory.setDefaultRequeueRejected(false); // NO reencolar mensajes fallidos
+        factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.AUTO);
+        
+        // Configurar reintentos limitados
+        factory.setMaxConcurrentConsumers(5);
+        factory.setConcurrentConsumers(1);
+        
+        // Configurar prefetch para reducir carga
+        factory.setPrefetchCount(10);
+        
         return factory;
     }
 }
