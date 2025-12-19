@@ -91,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws-spy/**").permitAll()
                         .requestMatchers("/computers", "/computers/**").permitAll()
                         .requestMatchers("/public", "/public/**").permitAll()
+                        .requestMatchers("/control", "/control/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
