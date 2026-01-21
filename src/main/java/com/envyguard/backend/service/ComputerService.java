@@ -95,6 +95,25 @@ public class ComputerService {
     }
 
     /**
+     * Updates a computer's status by ID.
+     * Used when the C# agent reports its status via RabbitMQ.
+     *
+     * @param id Computer ID
+     * @param statusString Status as string ("ONLINE" or "OFFLINE")
+     * @return Updated computer
+     */
+    @Transactional
+    public Computer updateComputerStatus(Long id, String statusString) {
+        Computer computer = getComputerById(id);
+        Computer.ComputerStatus status = "ONLINE".equalsIgnoreCase(statusString) 
+                ? Computer.ComputerStatus.ONLINE 
+                : Computer.ComputerStatus.OFFLINE;
+        computer.setStatus(status);
+        computer.setLastSeen(LocalDateTime.now());
+        return computerRepository.save(computer);
+    }
+
+    /**
      * Updates computer information.
      *
      * @param id Computer ID
