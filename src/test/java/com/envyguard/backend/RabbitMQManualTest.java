@@ -16,7 +16,7 @@ public class RabbitMQManualTest {
     @Test
     public void testConnection() {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("rabbitmq.envy.crudzaso.com");
+        factory.setHost("rabbitmq.andrescortes.dev");
         factory.setPort(5672);
         factory.setUsername(System.getenv("RABBITMQ_USERNAME"));
         factory.setPassword(System.getenv("RABBITMQ_PASSWORD"));
