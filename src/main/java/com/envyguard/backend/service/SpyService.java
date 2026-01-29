@@ -10,7 +10,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "envyguard.spy.enabled", havingValue = "true", matchIfMissing = false)
 public class SpyService {
 
     @Autowired
@@ -27,7 +26,7 @@ public class SpyService {
             }
 
             String jsonMessage = new String(message.getBody());
-            
+
             // Validar que el mensaje no esté vacío
             if (jsonMessage == null || jsonMessage.trim().isEmpty()) {
                 System.out.println("⚠️ MENSAJE VACÍO RECIBIDO - IGNORADO");
@@ -39,7 +38,7 @@ public class SpyService {
 
             // Reenviar a React
             messagingTemplate.convertAndSend("/topic/screens", jsonMessage);
-            
+
         } catch (Exception e) {
             // Capturar cualquier error y evitar que se propague
             System.err.println("❌ ERROR AL PROCESAR MENSAJE: " + e.getMessage());

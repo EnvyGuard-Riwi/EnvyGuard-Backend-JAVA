@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/control")
 @CrossOrigin(origins = "*")
-@ConditionalOnProperty(name = "envyguard.spy.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Exam Control", description = "Exam monitoring control API")
 public class SpyController {
 

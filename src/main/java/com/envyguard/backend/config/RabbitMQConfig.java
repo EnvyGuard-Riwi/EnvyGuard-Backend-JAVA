@@ -1,5 +1,6 @@
 package com.envyguard.backend.config;
 
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -14,8 +15,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * RabbitMQ configuration.
- * Defines queues and message serialization.
- * Currently configured but not used until RabbitMQ is connected.
+ * Defines queues, exchanges and message serialization.
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = false)
@@ -24,6 +24,9 @@ public class RabbitMQConfig {
     public static final String PC_COMMANDS_QUEUE = "pc_commands";
     public static final String PC_RESPONSES_QUEUE = "pc_responses";
     public static final String PC_STATUS_UPDATES_QUEUE = "pc_status_updates";
+
+    // Exchange for screen monitoring control commands (START/STOP)
+    public static final String SPY_CONTROL_EXCHANGE = "spy.control";
 
     /**
      * Defines the queue for commands sent to C# agents.
@@ -53,6 +56,17 @@ public class RabbitMQConfig {
     @Bean
     public Queue pcStatusUpdatesQueue() {
         return new Queue(PC_STATUS_UPDATES_QUEUE, true);
+    }
+
+    /**
+     * Declares the Fanout Exchange for screen monitoring control.
+     * Sends START/STOP commands to all connected C# agents.
+     *
+     * @return Configured FanoutExchange
+     */
+    @Bean
+    public FanoutExchange spyControlExchange() {
+        return new FanoutExchange(SPY_CONTROL_EXCHANGE, true, false);
     }
 
     /**
@@ -92,20 +106,20 @@ public class RabbitMQConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         // NO usar MessageConverter automático para evitar problemas con headers nulos
-        // factory.setMessageConverter(jsonMessageConverter()); 
+        // factory.setMessageConverter(jsonMessageConverter());
         factory.setMissingQueuesFatal(false);
-        
+
         // CRÍTICO: Configurar manejo de errores para evitar bucles infinitos
         factory.setDefaultRequeueRejected(false); // NO reencolar mensajes fallidos
         factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.AUTO);
-        
+
         // Configurar reintentos limitados
         factory.setMaxConcurrentConsumers(5);
         factory.setConcurrentConsumers(1);
-        
+
         // Configurar prefetch para reducir carga
         factory.setPrefetchCount(10);
-        
+
         return factory;
     }
 }
