@@ -109,6 +109,15 @@ public class RabbitMQConfig {
         // factory.setMessageConverter(jsonMessageConverter());
         factory.setMissingQueuesFatal(false);
 
+        // FIX: Add PostProcessor to handle messages with missing content-type (prevents
+        // NPE)
+        factory.setAfterReceivePostProcessors(message -> {
+            if (message.getMessageProperties().getContentType() == null) {
+                message.getMessageProperties().setContentType("application/json");
+            }
+            return message;
+        });
+
         // CRÍTICO: Configurar manejo de errores para evitar bucles infinitos
         factory.setDefaultRequeueRejected(false); // NO reencolar mensajes fallidos
         factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.AUTO);
