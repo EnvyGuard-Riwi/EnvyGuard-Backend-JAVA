@@ -12,8 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 /**
  * Listener for PC status updates from C# agents via RabbitMQ.
  * Only processes messages when status CHANGES (optimization to reduce traffic).
@@ -43,7 +41,7 @@ public class PcStatusListener {
             }
 
             String jsonMessage = new String(message.getBody());
-            
+
             if (jsonMessage == null || jsonMessage.trim().isEmpty()) {
                 log.warn("Received empty status message - ignoring");
                 return;
@@ -63,17 +61,16 @@ public class PcStatusListener {
                 return;
             }
 
-            log.info("📊 Status change: PC {} ({}) is now {}", 
-                    statusUpdate.getPcName(), 
-                    statusUpdate.getIpAddress(), 
+            log.info("📊 Status change: PC {} ({}) is now {}",
+                    statusUpdate.getPcName(),
+                    statusUpdate.getIpAddress(),
                     statusUpdate.getStatus());
 
             // Update status in database
             try {
                 computerService.updateComputerStatus(
                         statusUpdate.getPcId(),
-                        statusUpdate.getStatus()
-                );
+                        statusUpdate.getStatus());
             } catch (Exception e) {
                 log.error("Failed to update PC status in database: {}", e.getMessage());
             }
@@ -98,19 +95,19 @@ public class PcStatusListener {
     public static class PcStatusUpdate {
         @JsonProperty("PcId")
         private Long pcId;
-        
+
         @JsonProperty("PcName")
         private String pcName;
-        
+
         @JsonProperty("IpAddress")
         private String ipAddress;
-        
+
         @JsonProperty("MacAddress")
         private String macAddress;
-        
+
         @JsonProperty("Status")
         private String status;
-        
+
         @JsonProperty("Timestamp")
         private String timestamp;
     }

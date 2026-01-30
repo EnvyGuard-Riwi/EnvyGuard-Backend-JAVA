@@ -1,7 +1,6 @@
 package com.envyguard.backend.service;
 
 import com.envyguard.backend.dto.AgentCommandMessage;
-import com.envyguard.backend.dto.CommandMessage;
 import com.envyguard.backend.dto.CommandRequest;
 import com.envyguard.backend.entity.*;
 import com.envyguard.backend.repository.*;
@@ -34,10 +33,10 @@ public class CommandService {
     private RabbitMQService rabbitMQService;
 
     public CommandService(CommandRepository commandRepository,
-                          Sala1Repository sala1Repository,
-                          Sala2Repository sala2Repository,
-                          Sala3Repository sala3Repository,
-                          Sala4Repository sala4Repository) {
+            Sala1Repository sala1Repository,
+            Sala2Repository sala2Repository,
+            Sala3Repository sala3Repository,
+            Sala4Repository sala4Repository) {
         this.commandRepository = commandRepository;
         this.sala1Repository = sala1Repository;
         this.sala2Repository = sala2Repository;
@@ -47,11 +46,13 @@ public class CommandService {
 
     /**
      * Creates a new command for a computer.
-     * Validates that the computer exists in the specified sala before creating the command.
+     * Validates that the computer exists in the specified sala before creating the
+     * command.
      *
      * @param request CommandRequest with command data (salaNumber and pcId)
      * @return Created command
-     * @throws IllegalArgumentException If computer does not exist in the specified sala
+     * @throws IllegalArgumentException If computer does not exist in the specified
+     *                                  sala
      */
     @Transactional
     public Command createCommand(CommandRequest request) {
@@ -128,10 +129,10 @@ public class CommandService {
             try {
                 // Convertir acción del backend al formato del agente
                 String agentAction = ActionMapper.toAgentAction(command.getAction());
-                
+
                 // Construir mensaje en formato esperado por el agente C#
                 AgentCommandMessage agentMessage;
-                
+
                 if ("wakeup".equals(agentAction)) {
                     // Wake-on-LAN: targetIp vacío, incluir macAddress
                     agentMessage = AgentCommandMessage.builder()
@@ -142,23 +143,24 @@ public class CommandService {
                             .build();
                     log.debug("Mensaje Wake-on-LAN: action={}, macAddress={}", agentAction, command.getMacAddress());
                 } else {
-                    // Acciones normales: incluir targetIp, sin macAddress (será null y se excluirá del JSON)
+                    // Acciones normales: incluir targetIp, sin macAddress (será null y se excluirá
+                    // del JSON)
                     agentMessage = AgentCommandMessage.builder()
                             .action(agentAction)
                             .targetIp(command.getTargetIp())
                             .macAddress(null) // Explícitamente null para excluir del JSON
                             .parameters(command.getParameters() != null ? command.getParameters() : "")
                             .build();
-                    log.debug("Mensaje normal: action={}, targetIp={}, parameters={}", 
-                             agentAction, command.getTargetIp(), command.getParameters());
+                    log.debug("Mensaje normal: action={}, targetIp={}, parameters={}",
+                            agentAction, command.getTargetIp(), command.getParameters());
                 }
 
                 rabbitMQService.sendCommand(agentMessage);
                 command.setStatus(Command.CommandStatus.SENT);
                 command.setSentAt(LocalDateTime.now());
                 command = commandRepository.save(command);
-                log.info("Comando {} enviado a RabbitMQ exitosamente para {} en Sala {} (action: {})", 
-                         command.getId(), computerName, salaNumber, agentAction);
+                log.info("Comando {} enviado a RabbitMQ exitosamente para {} en Sala {} (action: {})",
+                        command.getId(), computerName, salaNumber, agentAction);
             } catch (IllegalArgumentException e) {
                 log.error("Acción inválida en comando {}: {}", command.getId(), e.getMessage());
                 command.setStatus(Command.CommandStatus.FAILED);
