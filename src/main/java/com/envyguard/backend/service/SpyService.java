@@ -14,8 +14,9 @@ public class SpyService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // CAMBIO CLAVE: key = "#" significa "Escuchar TODO lo que llegue al topic"
-    @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "java_spy_bridge", autoDelete = "true"), exchange = @Exchange(value = "amq.topic", type = "topic", ignoreDeclarationExceptions = "true"), key = "#"))
+    // Cola durable que persiste después de reiniciar, binding a amq.topic con key
+    // spy.screens
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "java_spy_bridge", durable = "true", autoDelete = "false"), exchange = @Exchange(value = "amq.topic", type = "topic", ignoreDeclarationExceptions = "true", durable = "true"), key = "spy.screens"))
     public void receiveAndBroadcast(org.springframework.amqp.core.Message message) {
         try {
             // Validar que el mensaje no sea nulo
