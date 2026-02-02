@@ -32,7 +32,7 @@ public class PcStatusListener {
      *
      * @param message Raw message from RabbitMQ
      */
-    @RabbitListener(queues = RabbitMQConfig.PC_STATUS_UPDATES_QUEUE)
+    // @RabbitListener(queues = RabbitMQConfig.PC_STATUS_UPDATES_QUEUE)
     public void handleStatusUpdate(org.springframework.amqp.core.Message message) {
         try {
             if (message == null || message.getBody() == null) {
