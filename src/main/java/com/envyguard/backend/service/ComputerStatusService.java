@@ -21,7 +21,7 @@ public class ComputerStatusService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
 
-    @RabbitListener(queues = "pc_status_updates")
+    // @RabbitListener(queues = "pc_status_updates")
     public void updateStatus(org.springframework.amqp.core.Message message) {
         try {
             // Validar que el mensaje no sea nulo
@@ -31,7 +31,7 @@ public class ComputerStatusService {
             }
 
             String jsonMessage = new String(message.getBody());
-            
+
             // Validar que el mensaje no esté vacío
             if (jsonMessage == null || jsonMessage.trim().isEmpty()) {
                 log.warn("Received empty message in pc_status_updates - ignoring");
@@ -39,7 +39,7 @@ public class ComputerStatusService {
             }
 
             log.debug("Received status update: {}", jsonMessage);
-            
+
             ComputerStatusDto statusDto;
             try {
                 statusDto = objectMapper.readValue(jsonMessage, ComputerStatusDto.class);
