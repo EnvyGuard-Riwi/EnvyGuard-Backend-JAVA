@@ -115,6 +115,10 @@ public class RabbitMQConfig {
             if (message.getMessageProperties().getContentType() == null) {
                 message.getMessageProperties().setContentType("application/json");
             }
+            // FIX: Set default priority if null to avoid NPE in SimpleAmqpHeaderMapper
+            if (message.getMessageProperties().getPriority() == null) {
+                message.getMessageProperties().setPriority(0);
+            }
             return message;
         });
 

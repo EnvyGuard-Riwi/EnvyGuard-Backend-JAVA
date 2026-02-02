@@ -21,7 +21,6 @@ public class SpyService {
         try {
             // Validar que el mensaje no sea nulo
             if (message == null || message.getBody() == null) {
-                System.out.println("⚠️ MENSAJE NULO RECIBIDO - IGNORADO");
                 return;
             }
 
@@ -29,14 +28,13 @@ public class SpyService {
 
             // Validar que el mensaje no esté vacío
             if (jsonMessage == null || jsonMessage.trim().isEmpty()) {
-                System.out.println("⚠️ MENSAJE VACÍO RECIBIDO - IGNORADO");
                 return;
             }
 
             // IMPRIMIR EN CONSOLA PARA VERIFICAR
             System.out.println("🟢 JAVA RECIBIÓ MENSAJE (Longitud: " + jsonMessage.length() + ")");
 
-            // Reenviar a React
+            // Reenviar a React (Video) en tiempo real
             messagingTemplate.convertAndSend("/topic/screens", jsonMessage);
 
         } catch (Exception e) {

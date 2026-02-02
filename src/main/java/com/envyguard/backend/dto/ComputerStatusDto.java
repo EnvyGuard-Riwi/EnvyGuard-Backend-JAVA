@@ -8,7 +8,12 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComputerStatusDto {
+    @com.fasterxml.jackson.annotation.JsonAlias("IpAddress")
     private String ipAddress;
+
+    @com.fasterxml.jackson.annotation.JsonAlias("Status")
     private String status;
+
+    @com.fasterxml.jackson.annotation.JsonAlias({ "PcName", "PcId" })
     private String hostname; // Optional, in case agent sends it
 }
