@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class ComputerStatusDto {
     @com.fasterxml.jackson.annotation.JsonAlias("IpAddress")
     private String ipAddress;
